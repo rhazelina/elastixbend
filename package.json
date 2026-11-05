@@ -1,6 +1,6 @@
 {
   "name": "elastixbend",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Elastic scroll displacement that never hijacks scroll.",
   "license": "BSD-3-Clause",
   "author": "Rhazelina Putri",

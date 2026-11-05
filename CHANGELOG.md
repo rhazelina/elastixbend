@@ -8,6 +8,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Nothing yet.
 
+## [0.1.1] - 2026-11-05
+
+### Added
+
+- `CHANGELOG.md` now ships inside the published package and is linked from the
+  README's API section.
+
+No runtime change. `0.1.0` and `0.1.1` behave identically.
+
 ## [0.1.0] - 2026-11-05
 
 First public release.
@@ -39,5 +48,6 @@ First public release.
 - `axis: "x"` is wired but no preset listens to horizontal input yet.
 - No Lenis adapter. Scroll ownership stays with whoever owns it.
 
-[Unreleased]: https://github.com/rhazelina/elastixbend/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/rhazelina/elastixbend/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/rhazelina/elastixbend/releases/tag/v0.1.1
 [0.1.0]: https://github.com/rhazelina/elastixbend/releases/tag/v0.1.0
