@@ -1,0 +1,14 @@
+[
+  {
+    "name": "core",
+    "path": "dist/index.js",
+    "import": "{ createBend }",
+    "limit": "5 KB"
+  },
+  {
+    "name": "react (+core)",
+    "path": "dist/react.js",
+    "ignore": ["react", "react-dom", "react/jsx-runtime"],
+    "limit": "5 KB"
+  }
+]

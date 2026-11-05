@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>elastixbend · surface</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <strong>surface</strong>
+      <span>konten tertinggal dari kecepatan scroll</span>
+      <span class="grow"></span>
+      <a href="/">semua preset</a>
+    </header>
+
+    <main class="stage" id="stage">
+      <div class="page">
+        <h1>Gulir cepat, lalu berhenti</h1>
+        <p>
+          Konten tertinggal sedikit di belakang arah gulir dan menyusul beberapa
+          saat kemudian. Tidak ada gestur yang ditahan: scroll tetap native, jadi
+          trackpad, roda mouse, keyboard, dan scrollbar semuanya terasa sama.
+        </p>
+        <p class="note">
+          Preset ini membaca kecepatan scroll, bukan gestur. Itu sebabnya ia
+          bekerja sama untuk semua jalur input, dan tidak pernah memanggil
+          <code>preventDefault</code>.
+        </p>
+        <div class="spacer"></div>
+        <p>Gulir naik-turun di sini dengan cepat untuk melihat efeknya.</p>
+        <div class="spacer"></div>
+        <p>Makin cepat gulirnya, makin jauh tarikan yang terbentuk.</p>
+        <div class="spacer"></div>
+      </div>
+    </main>
+
+    <dl class="readout" aria-live="off" id="readout">
+      <dt>pull</dt>
+      <dd><b id="pull">0.00</b> px</dd>
+      <dt>phase</dt>
+      <dd><b id="phase">idle</b></dd>
+    </dl>
+
+    <section class="controls-host" id="controls" aria-label="Parameter"></section>
+
+    <script type="module" src="/demo/surface.ts"></script>
+  </body>
+</html>

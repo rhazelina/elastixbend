@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>elastixbend playground</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="hub">
+      <h1>elastixbend</h1>
+      <p class="lede">
+        Dua preset, satu inti. Keduanya tidak pernah menulis posisi scroll dan tidak
+        pernah memanggil <code>preventDefault</code> pada gestur scroll.
+      </p>
+      <ul class="hub-list">
+        <li>
+          <a href="/edge.html">edge</a>
+          <span>Tarikan karet di tepi atas dan bawah dokumen. Wheel dan sentuh.</span>
+        </li>
+        <li>
+          <a href="/surface.html">surface</a>
+          <span>Konten tertinggal dari kecepatan scroll lalu menyusul.</span>
+        </li>
+      </ul>
+
+      <h2>Kenapa ada dua</h2>
+      <p class="lede">
+        Keduanya memakai pegas dan renderer yang sama. Bedanya hanya target:
+        <code>edge</code> membaca gestur di tepi dokumen, <code>surface</code>
+        membaca kecepatan scroll. Tidak ada mode yang menahan gestur, jadi
+        trackpad, roda mouse, keyboard, dan scrollbar tetap berfungsi sama.
+      </p>
+
+      <p class="lede note-path">
+        Halaman ini bagian dari playground. Pengukuran dan batas ukuran ada di
+        <code>README.md</code>.
+      </p>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>elastixbend · edge</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <strong>edge</strong>
+      <span>tarik di tepi atas atau bawah</span>
+      <span class="grow"></span>
+      <a href="/">semua preset</a>
+    </header>
+
+    <main class="stage" id="stage">
+      <div class="page">
+        <h1>Gulir sampai atas, lalu terus gulir</h1>
+        <p>
+          Konten tertarik ke bawah dengan tahanan, lalu memantul balik saat gestur
+          berhenti. Scroll tetap native: tidak ada posisi scroll yang ditulis oleh
+          library ini.
+        </p>
+        <p class="note">
+          Elemen <code>.topbar</code> sengaja berada di luar <code>#stage</code>.
+          Wrapper yang ditransform menjadi containing block, jadi elemen fixed di
+          dalamnya akan ikut bergeser.
+        </p>
+        <div class="spacer"></div>
+        <p>Bagian tengah. Di sini tidak ada efek sama sekali.</p>
+        <div class="spacer"></div>
+        <p id="bottom-marker">Ujung bawah. Terus gulir ke bawah untuk melihat tarikan.</p>
+        <div class="spacer"></div>
+      </div>
+    </main>
+
+    <dl class="readout" aria-live="off" id="readout">
+      <dt>pull</dt>
+      <dd><b id="pull">0.00</b> px</dd>
+      <dt>phase</dt>
+      <dd><b id="phase">idle</b></dd>
+    </dl>
+
+    <section class="controls-host" id="controls" aria-label="Parameter"></section>
+
+    <script type="module" src="/demo/edge.ts"></script>
+  </body>
+</html>
