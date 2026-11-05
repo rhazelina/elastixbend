@@ -31,7 +31,8 @@
     "dist",
     "README.md",
     "SPEC.md",
-    "DECISIONS.md"
+    "DECISIONS.md",
+    "CHANGELOG.md"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",

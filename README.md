@@ -186,7 +186,8 @@ the size budgets are hard gates.
 ## API
 
 Full contract in [`SPEC.md`](./SPEC.md). Rationale in
-[`DECISIONS.md`](./DECISIONS.md).
+[`DECISIONS.md`](./DECISIONS.md). Release history in
+[`CHANGELOG.md`](./CHANGELOG.md).
 
 ```ts
 createBend(element, {
