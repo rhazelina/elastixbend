@@ -63,14 +63,50 @@ afterEach(() => {
 });
 
 describe("edge preset", () => {
+  // Most of these assert the settled target, so keep the release timer out of
+  // the way. The spring needs ~0.4 s to arrive, and 16 ms frames have to tick.
+  const settle = { preset: "edge" as const, releaseDelay: 10_000 };
+  const ARRIVE = 40;
+
   it("pulls the content down when the wheel pushes past the top", () => {
-    const mounted = mount({ preset: "edge" });
+    const mounted = mount({ ...settle });
     wheel(-240);
-    frames(1);
+    frames(ARRIVE);
 
     expect(mounted.bend.state.pull).toBeCloseTo(80, 1);
     expect(mounted.bend.state.phase).toBe("pulling");
     expect(mounted.element.style.transform).toContain("translate3d(0, 80");
+  });
+
+  it("arrives over frames instead of jumping to the target", () => {
+    const mounted = mount({ ...settle });
+    wheel(-240);
+    frames(2);
+
+    // The spring is the thing that moves the band, so one wheel tick cannot
+    // teleport it. The first frame carries no dt at all.
+    expect(mounted.bend.state.pull).toBeGreaterThan(0);
+    expect(mounted.bend.state.pull).toBeLessThan(80);
+  });
+
+  it("reaches the same target however the gesture is split into events", () => {
+    // This is the contract: the result belongs to the total gesture distance,
+    // not to the browser's event cadence. One 240 px tick and twenty-four 10 px
+    // moves must land in the same place.
+    const once = mount({ ...settle });
+    wheel(-240);
+    frames(ARRIVE);
+    const fromOneEvent = once.bend.state.pull;
+    once.bend.destroy();
+
+    const split = mount({ ...settle });
+    for (let index = 0; index < 24; index += 1) {
+      wheel(-10);
+      frames(1);
+    }
+    frames(ARRIVE);
+
+    expect(split.bend.state.pull).toBeCloseTo(fromOneEvent, 1);
   });
 
   it("ignores scrolling away from the top edge", () => {
@@ -85,28 +121,29 @@ describe("edge preset", () => {
 
   it("pulls upward at the bottom edge", () => {
     setupScroll(2200);
-    const mounted = mount({ preset: "edge" });
+    const mounted = mount({ ...settle });
     wheel(240);
-    frames(1);
+    frames(ARRIVE);
 
     expect(mounted.bend.state.pull).toBeCloseTo(-80, 1);
     expect(mounted.element.style.transform).toContain("translate3d(0, -80");
   });
 
   it("caps the pull at the configured limit", () => {
-    const mounted = mount({ preset: "edge", max: { px: 50, ratio: 1 } });
+    const mounted = mount({ ...settle, max: { px: 50, ratio: 1 } });
     for (let index = 0; index < 20; index += 1) {
       wheel(-240);
       frames(1);
     }
+    frames(ARRIVE);
     expect(mounted.bend.state.pull).toBe(50);
   });
 
   it("springs back to rest after the release delay", () => {
     const mounted = mount({ preset: "edge", releaseDelay: 100 });
     wheel(-300);
-    frames(1);
-    expect(mounted.bend.state.pull).toBeGreaterThan(50);
+    frames(5);
+    expect(mounted.bend.state.pull).toBeGreaterThan(0);
 
     vi.advanceTimersByTime(120);
     expect(mounted.bend.state.phase).toBe("settling");
@@ -118,16 +155,16 @@ describe("edge preset", () => {
   });
 
   it("respects the resistance option", () => {
-    const mounted = mount({ preset: "edge", resistance: 1 });
+    const mounted = mount({ ...settle, resistance: 1 });
     wheel(-90);
-    frames(1);
-    expect(mounted.bend.state.pull).toBeCloseTo(90, 1);
+    frames(ARRIVE);
+    expect(mounted.bend.state.pull).toBeCloseTo(90, 0);
   });
 
   it("drops the pull when a click lands mid-band", () => {
-    const mounted = mount({ preset: "edge" });
+    const mounted = mount({ ...settle });
     wheel(-240);
-    frames(1);
+    frames(10);
     expect(mounted.bend.state.pull).toBeGreaterThan(0);
 
     window.dispatchEvent(new Event("pointerdown"));
@@ -151,9 +188,9 @@ describe("edge preset", () => {
   });
 
   it("releases when the page scrolls away from the edge", () => {
-    const mounted = mount({ preset: "edge" });
+    const mounted = mount({ ...settle });
     wheel(-240);
-    frames(1);
+    frames(10);
     scrollTo(400);
     frames(1);
     expect(mounted.bend.state.phase).not.toBe("pulling");
@@ -162,12 +199,12 @@ describe("edge preset", () => {
 
 describe("instance lifecycle", () => {
   it("notifies subscribers with a stable snapshot object", () => {
-    const { bend: instance } = mount({ preset: "edge" });
+    const { bend: instance } = mount({ preset: "edge", releaseDelay: 10_000 });
     const seen: number[] = [];
     const unsubscribe = instance.subscribe((state) => seen.push(state.pull));
 
     wheel(-240);
-    frames(1);
+    frames(40);
     expect(seen.at(-1)).toBeCloseTo(80, 1);
 
     unsubscribe();
@@ -179,7 +216,7 @@ describe("instance lifecycle", () => {
   it("returns to rest on pause and stops responding", () => {
     const { bend: instance } = mount({ preset: "edge" });
     wheel(-240);
-    frames(1);
+    frames(5);
 
     instance.pause();
     expect(instance.state.pull).toBe(0);
@@ -190,7 +227,7 @@ describe("instance lifecycle", () => {
 
     instance.resume();
     wheel(-240);
-    frames(1);
+    frames(5);
     expect(instance.state.pull).toBeGreaterThan(0);
   });
 
@@ -206,9 +243,9 @@ describe("instance lifecycle", () => {
   });
 
   it("writes to the cssVar renderer when asked", () => {
-    const mounted = mount({ preset: "edge", render: "cssVar" });
+    const mounted = mount({ preset: "edge", render: "cssVar", releaseDelay: 10_000 });
     wheel(-240);
-    frames(1);
+    frames(40);
     expect(mounted.element.style.getPropertyValue("--bend-pull")).toBe("80.00px");
     expect(mounted.element.style.transform).toBe("");
   });

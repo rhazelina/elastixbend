@@ -137,7 +137,14 @@ Displacement at the document edges, driven by wheel and touch.
 - At the **bottom** edge, a gesture directed further down produces a **negative**
   pull.
 - Any gesture pointing **into** the page scrolls normally and produces no pull.
-- After `releaseDelay` of quiet, the preset releases and springs to zero.
+- Resistance is applied to the **cumulative** gesture distance, never to a single
+  event. The same gesture produces the same target whether it arrives as one
+  wheel tick or twenty touch moves.
+- The band never jumps to that target: the spring chases it, so the rendered
+  displacement comes from the integrator rather than from event timing. A
+  coarse device and a precise one settle in the same place.
+- After `releaseDelay` of quiet, the preset releases and springs to zero, carrying
+  the band's own velocity.
 - A `pointerdown` while displaced snaps to rest immediately, so a click cannot
   land on a shifted target.
 - If the page scrolls off the edge by any means (keyboard, scrollbar,

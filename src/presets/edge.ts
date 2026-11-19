@@ -12,26 +12,54 @@ const MAX_CARRY = 2400;
  * Only wheel and touch are handled here. Native scroll keeps doing the actual
  * scrolling; we never write scroll position, so a smooth-scroll library on the
  * page can coexist with this without either side fighting the other.
+ *
+ * Two rules make the feel ours rather than the input's:
+ *
+ * 1. Resistance is applied to the **cumulative** gesture distance, not to each
+ *    event. A 240 px gesture produces the same target whether the browser
+ *    reported it as one wheel tick or twenty touch moves, at 60 Hz or 144 Hz.
+ * 2. The band never jumps to that target. The spring chases it, so the
+ *    displacement the eye sees is produced by our integrator, not by event
+ *    timing. A coarse device and a precise one settle in the same place.
  */
 export function createEdgePreset(host: PresetHost): PresetModule {
   const { resistance, releaseDelay } = host.options;
   const tracker = createVelocityTracker();
 
   let edge: Edge | null = null;
-  let queued = 0;
+  /** Cumulative gesture distance for this engage, in raw CSS pixels. */
+  let gesture = 0;
   let active = false;
   let timer: ReturnType<typeof setTimeout> | null = null;
 
+  /** Where the band belongs for the gesture collected so far. */
+  function target(): number {
+    if (edge === null) return 0;
+    const direction = edge === "top" ? 1 : -1;
+    return host.clampPull(direction * resist(gesture, resistance), edge);
+  }
+
+  function pursue(): void {
+    host.springTo(target());
+    host.requestFrame();
+  }
+
   const detachGeometry = host.geometry.watch(() => {
-    // A resize can change the limit, so an active pull may now be out of range.
-    if (active && edge !== null) host.setPull(host.clampPull(host.pull, edge));
+    // A resize can change the limit, so the target may now be out of range.
+    if (active) pursue();
   });
 
   const atTop = () => edgeAt(host.geometry.offset, host.geometry.limit) === "start";
   const atBottom = () => edgeAt(host.geometry.offset, host.geometry.limit) === "end";
 
+  function cancelTimer(): void {
+    if (timer === null) return;
+    clearTimeout(timer);
+    timer = null;
+  }
+
   function scheduleRelease(): void {
-    if (timer !== null) clearTimeout(timer);
+    cancelTimer();
     timer = setTimeout(() => {
       timer = null;
       if (active) release();
@@ -42,26 +70,28 @@ export function createEdgePreset(host: PresetHost): PresetModule {
     if (edge !== nextEdge) {
       edge = nextEdge;
       // Crossing from one edge to the other is a new gesture, not a continuation.
+      gesture = 0;
       tracker.reset();
     }
     active = true;
-    host.requestFrame();
+    pursue();
   }
 
   function release(): void {
-    if (timer !== null) {
-      clearTimeout(timer);
-      timer = null;
-    }
+    cancelTimer();
     if (!active) return;
 
     active = false;
-    queued = 0;
+    gesture = 0;
 
     // The carry is the band's own velocity, in px/s, so a flick keeps travelling
-    // the way the finger was pushing before the spring turns it around.
-    host.release(Math.max(-MAX_CARRY, Math.min(MAX_CARRY, tracker.velocity())));
+    // the way the finger was pushing before the spring turns it around. Sample
+    // the rendered pull once more, because the frame loop may already be idle.
+    tracker.push(host.pull, performance.now());
+    const carried = Math.max(-MAX_CARRY, Math.min(MAX_CARRY, tracker.velocity()));
     tracker.reset();
+
+    host.release(carried);
   }
 
   function onWheel(event: WheelEvent): void {
@@ -75,16 +105,17 @@ export function createEdgePreset(host: PresetHost): PresetModule {
 
     if (atTop() && !inward) {
       begin("top");
-      queued += Math.abs(delta);
+      gesture += Math.abs(delta);
     } else if (atBottom() && inward) {
       begin("bottom");
-      queued += Math.abs(delta);
+      gesture += Math.abs(delta);
     } else if (active) {
       release();
       return;
     } else {
       return;
     }
+    pursue();
     scheduleRelease();
   }
 
@@ -102,10 +133,7 @@ export function createEdgePreset(host: PresetHost): PresetModule {
     touching = true;
     touchY = touch.clientY;
     tracker.reset();
-    if (timer !== null) {
-      clearTimeout(timer);
-      timer = null;
-    }
+    cancelTimer();
   }
 
   function onTouchMove(event: TouchEvent): void {
@@ -119,13 +147,17 @@ export function createEdgePreset(host: PresetHost): PresetModule {
 
     if (atTop() && delta > 0) {
       begin("top");
-      queued += Math.abs(delta);
+      gesture += Math.abs(delta);
     } else if (atBottom() && delta < 0) {
       begin("bottom");
-      queued += Math.abs(delta);
+      gesture += Math.abs(delta);
     } else if (active) {
       release();
+      return;
+    } else {
+      return;
     }
+    pursue();
   }
 
   function onTouchEnd(): void {
@@ -136,7 +168,11 @@ export function createEdgePreset(host: PresetHost): PresetModule {
 
   // A click while the band is stretched would land on a shifted target.
   function onPointerDown(): void {
-    if (host.pull === 0) return;
+    if (!active && host.pull === 0) return;
+    cancelTimer();
+    active = false;
+    gesture = 0;
+    tracker.reset();
     host.snapToRest();
   }
 
@@ -164,23 +200,19 @@ export function createEdgePreset(host: PresetHost): PresetModule {
 
   return {
     frame() {
-      if (!active || edge === null || queued === 0) return false;
-      const direction = edge === "top" ? 1 : -1;
-      const next = host.clampPull(host.pull + direction * resist(queued, resistance), edge);
-      queued = 0;
-      host.setPull(next);
-
-      // Sample the displacement the band reached, so `release` carries real
-      // px/s of content movement instead of wheel-event noise.
-      tracker.push(next, performance.now());
-      return true;
+      if (!active) return false;
+      // Sample the displacement the band actually reached, so the release
+      // carries real px/s of movement instead of wheel-event noise or the
+      // target's speed.
+      tracker.push(host.pull, performance.now());
+      return false;
     },
     isEngaged() {
       return active;
     },
     destroy() {
       for (const [type, listener] of listeners) window.removeEventListener(type, listener);
-      if (timer !== null) clearTimeout(timer);
+      cancelTimer();
       detachGeometry();
     },
   };

@@ -186,3 +186,35 @@ only runs inside a frame, never ran again. The content stayed offset forever.
 Found by probing the settle path directly, not by an assertion that already
 existed. `tick` now only goes idle on a **zero** target, and a slow-scroll
 regression test covers it.
+
+## D13. The band owns its motion, not the input
+
+`edge` used to add `resist(delta)` to the pull inside the frame and call it
+directly. That made the displacement a step function of whichever events the
+browser happened to deliver. A 100 px wheel notch arrived in one frame and moved
+the band 33 px at once; the same 100 px of finger travel arrived as six touch
+moves and moved it in six smaller steps. Same total, visibly different motion.
+
+The preset now keeps a cumulative `gesture` distance and converts it to a
+target. The spring chases that target, so the rendered displacement is produced
+by our integrator on a fixed 1/240 s substep, at any refresh rate.
+
+Two properties follow, and both are tests rather than claims:
+
+1. **Event cadence does not matter.** One 240 px tick and twenty-four 10 px
+   moves reach the same settled pull.
+2. **Devices do not diverge.** Because the target depends on accumulated
+   distance and the motion is integrated in fixed steps, a coarse pointer and a
+   precise one converge to the same place. Density, event frequency, and frame
+   rate stop being inputs to the feel.
+
+This is also why the library will not chase Lenis. Lenis interpolates the
+**scroll position itself**, which C1 forbids. What can be owned without touching
+scroll is the displacement, and that is what this decision puts under our
+control: however stiff or wild the underlying scroll is, the band behaves the
+way this package defines, identically.
+
+The cost is one frame of lag between a wheel event and the first visible
+movement, because the first scheduled frame carries no `dt`. That is below the
+perceptual threshold for a gesture that is already being interpolated, and it is
+the price of not letting event timing shape the motion.

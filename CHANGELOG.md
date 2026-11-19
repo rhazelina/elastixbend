@@ -8,6 +8,30 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Nothing yet.
 
+## [0.1.2] - 2026-11-20
+
+### Changed
+
+- `edge` no longer jumps the band to the displaced position on each event. It
+  keeps a cumulative gesture distance and lets the spring chase the target, so
+  the rendered motion comes from the integrator instead of the input's event
+  cadence. A wheel tick and a stream of touch moves now produce the same visible
+  movement instead of the same total in a different shape.
+- The velocity carry is sampled from the band's rendered position at release,
+  including when the frame loop has already gone idle.
+
+### Fixed
+
+- A `pointerdown` during an active pull now clears the accumulated gesture as
+  well as the displacement, so the band cannot resume from a stale total.
+
+### Notes
+
+- The settled displacement for a given gesture is unchanged: `resist()` still
+  divides the cumulative distance and the same `max` clamp applies.
+- `0.1.0`, `0.1.1`, and `0.1.2` are not feel-identical. The spring-chase is
+  visible on the first gesture.
+
 ## [0.1.1] - 2026-11-05
 
 ### Added
@@ -48,6 +72,7 @@ First public release.
 - `axis: "x"` is wired but no preset listens to horizontal input yet.
 - No Lenis adapter. Scroll ownership stays with whoever owns it.
 
-[Unreleased]: https://github.com/rhazelina/elastixbend/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/rhazelina/elastixbend/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/rhazelina/elastixbend/releases/tag/v0.1.2
 [0.1.1]: https://github.com/rhazelina/elastixbend/releases/tag/v0.1.1
 [0.1.0]: https://github.com/rhazelina/elastixbend/releases/tag/v0.1.0

@@ -32,6 +32,21 @@ bend.destroy();
 That is the whole basic setup. `#stage` gets a `translate3d` while you pull past
 the top or bottom of the page.
 
+### What "identical" means here
+
+The displacement belongs to this library, not to your input device.
+
+- Resistance applies to the **total gesture distance**, never to a single event.
+  One 240 px wheel tick and twenty-four 10 px touch moves produce the same
+  target.
+- The band never jumps to that target. A spring chases it on a fixed 1/240 s
+  substep, so the motion you see comes from the integrator, not from event
+  cadence or refresh rate.
+
+A stiff trackpad, a stepped mouse wheel, and a finger on a phone all arrive at
+the same place. This is not a claim to feel like a smooth-scroll library; those
+interpolate scroll position, which this package refuses to touch.
+
 ### `preset: "surface"`
 
 Content trails behind scroll velocity instead of pulling at edges:
@@ -138,13 +153,13 @@ claimed. Reproduce with `npm run size` and `npm run measure`.
 
 | Entry | Brotli + deps (size-limit) | Minified + gzip | Budget |
 |---|---|---|---|
-| `elastixbend` (core) | **3.2 kB** | 3.75 kB | 5 kB |
+| `elastixbend` (core) | **3.22 kB** | 3.77 kB | 5 kB |
 | `elastixbend/react` (binding only) | not applicable | **0.54 kB** | 1.5 kB |
-| `elastixbend/react` (binding + core) | **3.64 kB** | 3.97 kB | 5 kB |
+| `elastixbend/react` (binding + core) | **3.66 kB** | 3.98 kB | 5 kB |
 
 The React binding is reported two ways on purpose: on its own (0.54 kB, what it
 adds to a page that already imported the core) and bundled with the core
-(3.65 kB, what a React-only consumer actually ships). `size-limit` cannot express
+(3.66 kB, what a React-only consumer actually ships). `size-limit` cannot express
 the first case because the built entry shares a chunk with the core, so it is
 measured by `npm run size:react` with the chunk marked external. `size-limit`'s
 figure is brotli; the gzip column is `esbuild --bundle --minify` plus `gzip -9`.
@@ -156,9 +171,9 @@ with the library not instantiated (`?off=1`).
 
 | Page | p50 frame | p95 frame | frames > 32 ms | layout | style recalc | script | loop settles |
 |---|---|---|---|---|---|---|---|
-| `edge` | 16.7 ms | 16.8 ms | 0 | 1 | 16 | 12 ms | 431 ms |
-| `surface` | 16.7 ms | 16.7 ms | 0 | 0 | 0 | 1 ms | 0 ms |
-| baseline | 16.7 ms | 16.7 ms | 0 | 0 | 0 | 1 ms | n/a |
+| `edge` | 16.7 ms | 16.7 ms | 0 | 1 | 26 | 8 ms | 444 ms |
+| `surface` | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 2 ms | 0 ms |
+| baseline | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 1 ms | n/a |
 
 "loop settles" is the time until the shared `requestAnimationFrame` task count
 reaches zero after the gesture ends. `surface` reads 0 immediately because its
@@ -166,7 +181,10 @@ last frame already returned `false`.
 
 **Style recalc on `edge` is the renderer writing `style.transform` and
 `style.willChange`.** It is bounded by the number of frames that actually move,
-not by input event count, and it does not show up as frame drops.
+not by input event count, and it does not show up as frame drops. Since `0.1.2`
+the band moves on every frame of the chase rather than jumping once, so the
+recalc count is higher (26 vs 16) while script time is unchanged. That is the
+cost of the spring owning the motion, and it stays inside the same frame budget.
 
 ### Not measured
 
