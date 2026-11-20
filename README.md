@@ -14,6 +14,8 @@ npm install elastixbend
 Zero runtime dependencies. React is an optional peer, only if you import
 `elastixbend/react`.
 
+Documentation: **https://elastixbend.vercel.app**
+
 ---
 
 ## Quickstart
@@ -30,7 +32,7 @@ bend.destroy();
 ```
 
 That's the whole basic setup. `#stage` gets a `translate3d` while you pull past
-the top or bottom of the page.
+the top or bottom of the page, or the left and right edges on `axis: "x"`.
 
 ### What "identical" means here
 
@@ -54,6 +56,18 @@ createBend(el, { preset: "surface", lagFactor: 0.04 });
 
 Works for wheel, touch, keyboard, scrollbar, and programmatic scroll, because it
 reads scroll position rather than input events.
+
+### `axis: "x"`
+
+Both presets follow the axis, geometry included:
+
+```ts
+createBend(el, { preset: "edge", axis: "x" });
+```
+
+The document has to scroll horizontally, since the limit comes from
+`scrollWidth - clientWidth`. A wide element inside a scrolling `div` will not
+drive the effect.
 
 ### Composing with your own transform
 
@@ -131,8 +145,9 @@ Read these before shipping.
    it reads scroll position. `edge` reads wheel events, so the two will double up.
    See `DECISIONS.md` D2.
 5. **Options are immutable.** No `setOptions`. Destroy and recreate.
-6. **`axis: "x"` is wired but no preset listens to horizontal input.** Use it with
-   your own driver.
+6. **`axis: "x"` moves the whole preset onto the horizontal axis.** Geometry,
+   `deltaX`, touch, and rendering all follow it; the page still has to scroll
+   horizontally for the effect to have anywhere to go.
 7. **Only wheel and touch drive `edge`.** Keyboard scrolling and scrollbar drags
    release the band rather than driving it. That's intended: they aren't gestures
    you can rubber-band.
@@ -149,13 +164,13 @@ Reproduce with `npm run size` and `npm run measure`.
 
 | Entry | Brotli + deps (size-limit) | Minified + gzip | Budget |
 |---|---|---|---|
-| `elastixbend` (core) | **3.35 kB** | 3.94 kB | 5 kB |
+| `elastixbend` (core) | **3.41 kB** | 3.96 kB | 5 kB |
 | `elastixbend/react` (binding only) | not applicable | **0.54 kB** | 1.5 kB |
-| `elastixbend/react` (binding + core) | **3.81 kB** | 4.13 kB | 5 kB |
+| `elastixbend/react` (binding + core) | **3.83 kB** | 4.16 kB | 5 kB |
 
 The React binding is reported two ways on purpose: on its own (0.54 kB, what it
 adds to a page that already imported the core) and bundled with the core
-(3.81 kB, what a React-only consumer actually ships). `size-limit` cannot express
+(3.83 kB, what a React-only consumer actually ships). `size-limit` cannot express
 the first case because the built entry shares a chunk with the core, so it is
 measured by `npm run size:react` with the chunk marked external. `size-limit`'s
 figure is brotli; the gzip column is `esbuild --bundle --minify` plus `gzip -9`.
@@ -167,7 +182,7 @@ with the library not instantiated (`?off=1`).
 
 | Page | p50 frame | p95 frame | frames > 32 ms | layout | style recalc | script | loop settles |
 |---|---|---|---|---|---|---|---|
-| `edge` | 16.7 ms | 16.7 ms | 0 | 1 | 26 | 7 ms | 505 ms |
+| `edge` | 16.7 ms | 16.8 ms | 0 | 1 | 26 | 8 ms | 478 ms |
 | `surface` | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 1 ms | 0 ms |
 | baseline | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 1 ms | n/a |
 
@@ -249,12 +264,15 @@ createBend(el, { resistance: { touch: 6 } });       // wheel keeps 5
 npm install
 npm run dev        # playground at :5173 (index / edge / surface)
 npm run typecheck
-npm run test       # 76 unit tests, jsdom
+npm run test       # unit tests, jsdom
 npm run test:e2e   # Playwright, needs `npx playwright install chromium`
 npm run build      # tsup → dist/ (ESM + .d.ts)
 npm run size       # size-limit gate
 npm run size:react # react binding alone vs with core, gzip
 npm run measure    # frame/layout measurement, needs the dev server running
+npm --prefix docs install  # once, installs the docs site
+npm run docs:dev   # documentation site (VitePress)
+npm run docs:build # static docs in docs/.vitepress/dist
 npm run verify     # typecheck + test + build + size + size:react
 ```
 

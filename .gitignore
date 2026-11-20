@@ -4,3 +4,12 @@ playground-dist
 test-results
 playwright-report
 *.log
+
+# Docs
+docs/node_modules
+docs/.vitepress/dist
+docs/.vitepress/cache
+docs/.vitepress/.temp
+
+# Vercel
+.vercel
