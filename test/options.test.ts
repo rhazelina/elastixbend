@@ -5,7 +5,8 @@ import {
   DEFAULT_MAX_PX,
   DEFAULT_MAX_RATIO,
   DEFAULT_RELEASE_DELAY,
-  DEFAULT_RESISTANCE,
+  DEFAULT_RESISTANCE_TOUCH,
+  DEFAULT_RESISTANCE_WHEEL,
   DEFAULT_SPRING,
 } from "../src/constants";
 
@@ -14,7 +15,11 @@ describe("resolveOptions", () => {
     const resolved = resolveOptions();
     expect(resolved.preset).toBe("edge");
     expect(resolved.axis).toBe("y");
-    expect(resolved.resistance).toBe(DEFAULT_RESISTANCE);
+    expect(resolved.resistance).toEqual({
+      wheel: DEFAULT_RESISTANCE_WHEEL,
+      touch: DEFAULT_RESISTANCE_TOUCH,
+    });
+    expect(resolved.curve).toBe("linear");
     expect(resolved.max).toEqual({ px: DEFAULT_MAX_PX, ratio: DEFAULT_MAX_RATIO });
     expect(resolved.spring).toEqual({
       stiffness: DEFAULT_SPRING.stiffness,
@@ -33,6 +38,17 @@ describe("resolveOptions", () => {
     expect(resolved.spring).toEqual({ stiffness: 300, damping: 30, mass: 1 });
   });
 
+  it("applies a numeric resistance to both input classes", () => {
+    expect(resolveOptions({ resistance: 4 }).resistance).toEqual({ wheel: 4, touch: 4 });
+  });
+
+  it("keeps the other default when the resistance object is partial", () => {
+    expect(resolveOptions({ resistance: { touch: 4 } }).resistance).toEqual({
+      wheel: DEFAULT_RESISTANCE_WHEEL,
+      touch: 4,
+    });
+  });
+
   it("does not let an explicit zero fall back to the default", () => {
     const resolved = resolveOptions({
       resistance: 0,
@@ -40,7 +56,7 @@ describe("resolveOptions", () => {
       releaseDelay: 0,
       max: { px: 0, ratio: 0 },
     });
-    expect(resolved.resistance).toBe(0);
+    expect(resolved.resistance).toEqual({ wheel: 0, touch: 0 });
     expect(resolved.lagFactor).toBe(0);
     expect(resolved.releaseDelay).toBe(0);
     expect(resolved.max).toEqual({ px: 0, ratio: 0 });

@@ -149,13 +149,13 @@ Reproduce with `npm run size` and `npm run measure`.
 
 | Entry | Brotli + deps (size-limit) | Minified + gzip | Budget |
 |---|---|---|---|
-| `elastixbend` (core) | **3.22 kB** | 3.77 kB | 5 kB |
+| `elastixbend` (core) | **3.35 kB** | 3.94 kB | 5 kB |
 | `elastixbend/react` (binding only) | not applicable | **0.54 kB** | 1.5 kB |
-| `elastixbend/react` (binding + core) | **3.66 kB** | 3.98 kB | 5 kB |
+| `elastixbend/react` (binding + core) | **3.81 kB** | 4.13 kB | 5 kB |
 
 The React binding is reported two ways on purpose: on its own (0.54 kB, what it
 adds to a page that already imported the core) and bundled with the core
-(3.66 kB, what a React-only consumer actually ships). `size-limit` cannot express
+(3.81 kB, what a React-only consumer actually ships). `size-limit` cannot express
 the first case because the built entry shares a chunk with the core, so it is
 measured by `npm run size:react` with the chunk marked external. `size-limit`'s
 figure is brotli; the gzip column is `esbuild --bundle --minify` plus `gzip -9`.
@@ -167,8 +167,8 @@ with the library not instantiated (`?off=1`).
 
 | Page | p50 frame | p95 frame | frames > 32 ms | layout | style recalc | script | loop settles |
 |---|---|---|---|---|---|---|---|
-| `edge` | 16.7 ms | 16.7 ms | 0 | 1 | 26 | 8 ms | 444 ms |
-| `surface` | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 2 ms | 0 ms |
+| `edge` | 16.7 ms | 16.7 ms | 0 | 1 | 26 | 7 ms | 505 ms |
+| `surface` | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 1 ms | 0 ms |
 | baseline | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 1 ms | n/a |
 
 "loop settles" is the time until the shared `requestAnimationFrame` task count
@@ -205,7 +205,8 @@ Full contract in [`SPEC.md`](./SPEC.md). Rationale in
 createBend(element, {
   preset: "edge" | "surface",
   axis: "x" | "y",
-  resistance: number,
+  resistance: number | { wheel: number, touch: number },
+  curve: "linear" | "ease",
   max: { px: number, ratio: number },
   spring: { stiffness: number, damping: number, mass: number },
   render: "transform" | "cssVar",
@@ -226,9 +227,19 @@ bend.resume()
 bend.destroy()  // idempotent; restores the styles it took over
 ```
 
-Defaults: `resistance: 3`, `max: { px: 120, ratio: 0.18 }`,
+Defaults: `resistance: { wheel: 5, touch: 3 }`, `curve: "linear"`,
+`max: { px: 120, ratio: 0.18 }`,
 `spring: { stiffness: 200, damping: 25, mass: 1 }`, `lagFactor: 0.04`,
 `releaseDelay: 140`.
+
+Resistance is a divisor, so a higher number means a heavier band. Wheel and touch
+default apart because the two inputs cover very different distances per unit of
+effort. Pass a number to use one value for both:
+
+```ts
+createBend(el, { resistance: 4 });                  // both classes
+createBend(el, { resistance: { touch: 6 } });       // wheel keeps 5
+```
 
 ---
 

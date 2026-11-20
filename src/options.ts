@@ -3,15 +3,27 @@ import {
   DEFAULT_MAX_PX,
   DEFAULT_MAX_RATIO,
   DEFAULT_RELEASE_DELAY,
-  DEFAULT_RESISTANCE,
+  DEFAULT_RESISTANCE_TOUCH,
+  DEFAULT_RESISTANCE_WHEEL,
   DEFAULT_SPRING,
 } from "./constants";
-import type { BendOptions, Axis, MaxPull, PresetName, RenderKind, SpringConfig } from "./types";
+import type {
+  Axis,
+  BendOptions,
+  Curve,
+  MaxPull,
+  PresetName,
+  RenderKind,
+  Resistance,
+  ResistanceConfig,
+  SpringConfig,
+} from "./types";
 
 export interface ResolvedOptions {
   preset: PresetName;
   axis: Axis;
-  resistance: number;
+  resistance: Required<ResistanceConfig>;
+  curve: Curve;
   max: Required<MaxPull>;
   spring: Required<SpringConfig>;
   render: RenderKind;
@@ -23,11 +35,24 @@ export interface ResolvedOptions {
   debug: boolean;
 }
 
+/**
+ * A number applies to both input classes. An object only overrides what it
+ * names, so `{ touch: 4 }` keeps the wheel default.
+ */
+function resolveResistance(value: Resistance | undefined): Required<ResistanceConfig> {
+  if (typeof value === "number") return { wheel: value, touch: value };
+  return {
+    wheel: value?.wheel ?? DEFAULT_RESISTANCE_WHEEL,
+    touch: value?.touch ?? DEFAULT_RESISTANCE_TOUCH,
+  };
+}
+
 export function resolveOptions(options: BendOptions = {}): ResolvedOptions {
   return {
     preset: options.preset ?? "edge",
     axis: options.axis ?? "y",
-    resistance: options.resistance ?? DEFAULT_RESISTANCE,
+    resistance: resolveResistance(options.resistance),
+    curve: options.curve ?? "linear",
     max: {
       px: options.max?.px ?? DEFAULT_MAX_PX,
       ratio: options.max?.ratio ?? DEFAULT_MAX_RATIO,

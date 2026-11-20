@@ -40,7 +40,11 @@ function optionsFrom(raw: Record<string, number> = {}): Parameters<typeof create
   return {
     preset: "edge",
     debug: true,
-    resistance: raw.resistance ?? 3,
+    resistance: {
+      wheel: raw.resistanceWheel ?? 5,
+      touch: raw.resistanceTouch ?? 3,
+    },
+    curve: raw.curve === 1 ? "ease" : "linear",
     max: { px: raw.maxPx ?? 120, ratio: raw.maxRatio ?? 0.18 },
     spring: { stiffness: raw.stiffness ?? 200, damping: raw.damping ?? 25 },
     releaseDelay: raw.releaseDelay ?? 140,
@@ -66,7 +70,20 @@ if (!off) {
     mountControls(
       panel,
       [
-        { key: "resistance", label: "resistance", min: 1, max: 8, step: 0.5, value: 3 },
+        { key: "resistanceWheel", label: "resistance wheel", min: 1, max: 8, step: 0.5, value: 5 },
+        { key: "resistanceTouch", label: "resistance touch", min: 1, max: 8, step: 0.5, value: 3 },
+        {
+          key: "curve",
+          label: "curve",
+          min: 0,
+          max: 1,
+          step: 1,
+          value: 0,
+          choices: [
+            { label: "linear", value: 0 },
+            { label: "ease", value: 1 },
+          ],
+        },
         { key: "maxPx", label: "max px", min: 20, max: 300, step: 10, value: 120 },
         { key: "maxRatio", label: "max ratio", min: 0.05, max: 0.4, step: 0.01, value: 0.18 },
         { key: "stiffness", label: "stiffness", min: 60, max: 500, step: 10, value: 200 },

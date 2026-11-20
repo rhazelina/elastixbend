@@ -6,9 +6,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `resistance` accepts `{ wheel, touch }` so the two input classes can be tuned
+  apart. Defaults are `{ wheel: 5, touch: 3 }`.
+- `curve: "linear" | "ease"`, default `"linear"`. `ease` saturates toward the
+  pull limit after the resistance is applied.
+
 ### Changed
 
 - Docs rewritten for a consistent voice; no runtime change.
+- **Feel change:** the default wheel resistance is 5, where `resistance` was
+  previously one number at 3. Same resistance on wheel now needs
+  `resistance: 3`.
+- `DEFAULT_RESISTANCE` is replaced by `DEFAULT_RESISTANCE_WHEEL` and
+  `DEFAULT_RESISTANCE_TOUCH`.
 
 ## [0.1.2] - 2026-11-20
 

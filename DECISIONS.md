@@ -209,3 +209,30 @@ without touching scroll.
 The cost is one frame of lag between a wheel event and the first visible
 movement, because the first scheduled frame carries no `dt`. That's below the
 perceptual threshold for a gesture that's already being interpolated.
+
+## D14. Wheel and touch carry separate resistance
+
+One number was wrong for two inputs. A wheel notch reports around 100 px of
+delta in one event; a finger reports about 60 px of travel spread over many
+events. With a single divisor, whichever class was tuned by hand felt right and
+the other felt either glued or slippery.
+
+The split is derived, not guessed from vibes: one notch at resistance 5 gives
+20 px of band, and 60 px of finger travel at resistance 3 also gives 20 px. That
+equates them by displacement per gesture rather than by raw delta, which is the
+only thing the two inputs share.
+
+A number still means "both classes" so the old form keeps working. An object
+only overrides the keys it names, so `{ touch: 6 }` leaves the wheel default
+alone.
+
+Switching class mid-gesture resets the cumulative sum. Summing a wheel notch and
+a finger travel under different divisors would make the band jump at the
+handover, and a phone that fires both for one action is common enough to matter.
+
+`curve: "ease"` is the other half of the same problem. Linear resistance pins
+the band against the ceiling on a long drag, which reads as the gesture stopping
+rather than as weight. The saturation curve keeps the first part of the pull
+linear and gives diminishing returns after that, so the band never quite reaches
+the limit. It is opt-in because it changes the feel and has not been tuned on
+device yet.

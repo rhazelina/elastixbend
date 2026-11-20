@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clampToEdge, pullLimit, resist } from "../src/kernels/resistance";
+import { clampToEdge, pullLimit, resist, resistEase } from "../src/kernels/resistance";
 import { clamp } from "../src/constants";
 
 describe("resist", () => {
@@ -10,6 +10,36 @@ describe("resist", () => {
   it("passes the gesture through when resistance is disabled", () => {
     expect(resist(90, 0)).toBe(90);
     expect(resist(-90, -1)).toBe(-90);
+  });
+});
+
+describe("resistEase", () => {
+  it("starts with the same slope as the linear curve", () => {
+    // d/dx limit * (1 - exp(-x / limit)) at 0 is 1, so a small gesture is
+    // barely eased at all.
+    expect(resistEase(1, 3, 120)).toBeCloseTo(resist(1, 3), 3);
+  });
+
+  it("stays under the linear curve past the knee", () => {
+    expect(resistEase(90, 3, 120)).toBeLessThan(resist(90, 3));
+    expect(resistEase(90, 3, 120)).toBeGreaterThan(resist(90, 3) / 2);
+  });
+
+  it("saturates below the limit instead of crossing it", () => {
+    expect(resistEase(1200, 3, 120)).toBeLessThan(120);
+    expect(resistEase(1200, 3, 120)).toBeGreaterThan(110);
+  });
+
+  it("keeps growing with the gesture", () => {
+    expect(resistEase(600, 3, 120)).toBeGreaterThan(resistEase(300, 3, 120));
+  });
+
+  it("mirrors the sign of the gesture", () => {
+    expect(resistEase(-300, 3, 120)).toBeCloseTo(-resistEase(300, 3, 120), 6);
+  });
+
+  it("falls back to linear without a limit", () => {
+    expect(resistEase(90, 3, 0)).toBe(30);
   });
 });
 

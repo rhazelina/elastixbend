@@ -5,6 +5,8 @@ export interface ControlSpec {
   max: number;
   step: number;
   value: number;
+  /** When present the control renders as a select instead of a slider. */
+  choices?: Array<{ label: string; value: number }>;
 }
 
 export interface ControlState {
@@ -38,6 +40,27 @@ export function mountControls(
     const value = document.createElement("output");
     value.textContent = format(spec.value);
 
+    if (spec.choices) {
+      const select = document.createElement("select");
+      select.name = spec.key;
+      for (const choice of spec.choices) {
+        const option = document.createElement("option");
+        option.value = String(choice.value);
+        option.textContent = choice.label;
+        option.selected = choice.value === spec.value;
+        select.append(option);
+      }
+      select.addEventListener("change", () => {
+        const next = Number(select.value);
+        state[spec.key] = next;
+        value.textContent = choices(spec, next);
+        onChange({ ...state });
+      });
+      field.append(name, value, select);
+      form.append(field);
+      continue;
+    }
+
     const input = document.createElement("input");
     input.type = "range";
     input.name = spec.key;
@@ -61,4 +84,8 @@ export function mountControls(
 
 function format(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
+}
+
+function choices(spec: ControlSpec, value: number): string {
+  return spec.choices?.find((choice) => choice.value === value)?.label ?? format(value);
 }

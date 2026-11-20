@@ -56,7 +56,9 @@ The instance does not touch the DOM until the first gesture.
 interface BendOptions {
   preset?: "edge" | "surface";        // default "edge"
   axis?: "x" | "y";                   // default "y"
-  resistance?: number;                // default 3
+  resistance?: number | { wheel?: number; touch?: number };
+                                      // default { wheel: 5, touch: 3 }
+  curve?: "linear" | "ease";          // default "linear"
   max?: { px?: number; ratio?: number };  // default { px: 120, ratio: 0.18 }
   spring?: { stiffness?: number; damping?: number; mass?: number };
   render?: "transform" | "cssVar";    // default "transform"
@@ -75,6 +77,17 @@ change visible.
 
 `max` is the smaller of `px` and `ratio × viewport`, so a phone does not get a
 desktop-sized pull.
+
+`resistance` is a divisor applied to the cumulative gesture distance. A plain
+number applies to every input class. The object form tunes wheel and touch
+apart, because one wheel notch and one finger swipe cover very different
+distances; a key that is not named keeps its default. Switching input class
+mid-gesture starts a new gesture rather than reusing the running sum.
+
+`curve: "ease"` divides by the resistance and then saturates:
+`limit × (1 − exp(−|d| / limit))`. It starts with the same slope as `linear`, so
+short pulls feel unchanged, and long gestures approach the pull limit instead of
+pinning it.
 
 ### 4.3 `BendState`
 

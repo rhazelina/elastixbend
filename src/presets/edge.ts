@@ -1,10 +1,13 @@
 import { edgeAt } from "../geometry";
 import { createVelocityTracker, normalizeWheel } from "../input";
-import { resist } from "../kernels/resistance";
+import { resist, resistEase } from "../kernels/resistance";
 import type { Edge, PresetHost, PresetModule } from "./types";
 
 /** A flick should not throw the band across the screen, whatever the device. */
 const MAX_CARRY = 2400;
+
+/** Which resistance and curve apply to the gesture currently driving the band. */
+type InputClass = "wheel" | "touch";
 
 /**
  * Pull at the top or bottom of the document.
@@ -18,25 +21,33 @@ const MAX_CARRY = 2400;
  * 1. Resistance is applied to the **cumulative** gesture distance, not to each
  *    event. A 240 px gesture produces the same target whether the browser
  *    reported it as one wheel tick or twenty touch moves, at 60 Hz or 144 Hz.
+ *    Wheel and touch can carry different resistance, so one notch and one
+ *    finger travel can land on the same displacement.
  * 2. The band never jumps to that target. The spring chases it, so the
  *    displacement the eye sees is produced by our integrator, not by event
  *    timing. A coarse device and a precise one settle in the same place.
  */
 export function createEdgePreset(host: PresetHost): PresetModule {
-  const { resistance, releaseDelay } = host.options;
+  const { releaseDelay } = host.options;
   const tracker = createVelocityTracker();
 
   let edge: Edge | null = null;
   /** Cumulative gesture distance for this engage, in raw CSS pixels. */
   let gesture = 0;
   let active = false;
+  let input: InputClass = "wheel";
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   /** Where the band belongs for the gesture collected so far. */
   function target(): number {
     if (edge === null) return 0;
     const direction = edge === "top" ? 1 : -1;
-    return host.clampPull(direction * resist(gesture, resistance), edge);
+    const resistance = host.options.resistance[input];
+    const shaped =
+      host.options.curve === "ease"
+        ? resistEase(direction * gesture, resistance, host.pullLimit())
+        : direction * resist(gesture, resistance);
+    return host.clampPull(shaped, edge);
   }
 
   function pursue(): void {
@@ -66,9 +77,12 @@ export function createEdgePreset(host: PresetHost): PresetModule {
     }, releaseDelay);
   }
 
-  function begin(nextEdge: Edge): void {
-    if (edge !== nextEdge) {
+  function begin(nextEdge: Edge, nextInput: InputClass): void {
+    // A different input class mid-gesture is a new gesture: the two classes
+    // have different resistance, so keeping the sum would make the band jump.
+    if (edge !== nextEdge || input !== nextInput) {
       edge = nextEdge;
+      input = nextInput;
       // Crossing from one edge to the other is a new gesture, not a continuation.
       gesture = 0;
       tracker.reset();
@@ -104,10 +118,10 @@ export function createEdgePreset(host: PresetHost): PresetModule {
     const inward = delta > 0;
 
     if (atTop() && !inward) {
-      begin("top");
+      begin("top", "wheel");
       gesture += Math.abs(delta);
     } else if (atBottom() && inward) {
-      begin("bottom");
+      begin("bottom", "wheel");
       gesture += Math.abs(delta);
     } else if (active) {
       release();
@@ -146,10 +160,10 @@ export function createEdgePreset(host: PresetHost): PresetModule {
     if (host.isNested(event.target, host.axis, delta)) return;
 
     if (atTop() && delta > 0) {
-      begin("top");
+      begin("top", "touch");
       gesture += Math.abs(delta);
     } else if (atBottom() && delta < 0) {
-      begin("bottom");
+      begin("bottom", "touch");
       gesture += Math.abs(delta);
     } else if (active) {
       release();

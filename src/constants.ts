@@ -1,6 +1,7 @@
 import type { SpringConfig } from "./types";
 
-export const DEFAULT_RESISTANCE = 3;
+export const DEFAULT_RESISTANCE_WHEEL = 5;
+export const DEFAULT_RESISTANCE_TOUCH = 3;
 export const DEFAULT_MAX_PX = 120;
 export const DEFAULT_MAX_RATIO = 0.18;
 export const DEFAULT_RELEASE_DELAY = 140;

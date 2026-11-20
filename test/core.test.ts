@@ -31,6 +31,18 @@ function wheel(deltaY: number): void {
   window.dispatchEvent(new WheelEvent("wheel", { deltaY, cancelable: true }));
 }
 
+/**
+ * jsdom has no `TouchEvent`, and the preset only reads `clientY` and `length`,
+ * so a plain event carrying those fields is enough.
+ */
+function touchEvent(type: string, clientY: number): Event {
+  const event = new Event(type);
+  Object.defineProperty(event, "touches", {
+    value: type === "touchend" || type === "touchcancel" ? [] : [{ clientY }],
+  });
+  return event;
+}
+
 function frames(count = 1): void {
   for (let index = 0; index < count; index += 1) vi.advanceTimersByTime(16);
 }
@@ -73,9 +85,10 @@ describe("edge preset", () => {
     wheel(-240);
     frames(ARRIVE);
 
-    expect(mounted.bend.state.pull).toBeCloseTo(80, 1);
+    // Default wheel resistance is 5, so 240 px of notch becomes 48 px of band.
+    expect(mounted.bend.state.pull).toBeCloseTo(48, 1);
     expect(mounted.bend.state.phase).toBe("pulling");
-    expect(mounted.element.style.transform).toContain("translate3d(0, 80");
+    expect(mounted.element.style.transform).toContain("translate3d(0, 48");
   });
 
   it("arrives over frames instead of jumping to the target", () => {
@@ -86,7 +99,7 @@ describe("edge preset", () => {
     // The spring is the thing that moves the band, so one wheel tick cannot
     // teleport it. The first frame carries no dt at all.
     expect(mounted.bend.state.pull).toBeGreaterThan(0);
-    expect(mounted.bend.state.pull).toBeLessThan(80);
+    expect(mounted.bend.state.pull).toBeLessThan(48);
   });
 
   it("reaches the same target however the gesture is split into events", () => {
@@ -125,8 +138,8 @@ describe("edge preset", () => {
     wheel(240);
     frames(ARRIVE);
 
-    expect(mounted.bend.state.pull).toBeCloseTo(-80, 1);
-    expect(mounted.element.style.transform).toContain("translate3d(0, -80");
+    expect(mounted.bend.state.pull).toBeCloseTo(-48, 1);
+    expect(mounted.element.style.transform).toContain("translate3d(0, -48");
   });
 
   it("caps the pull at the configured limit", () => {
@@ -159,6 +172,37 @@ describe("edge preset", () => {
     wheel(-90);
     frames(ARRIVE);
     expect(mounted.bend.state.pull).toBeCloseTo(90, 0);
+  });
+
+  it("applies the wheel resistance to a wheel gesture", () => {
+    const mounted = mount({ ...settle, resistance: { wheel: 2 } });
+    wheel(-240);
+    frames(ARRIVE);
+    // 240 / 2 = 120, but the viewport ratio caps the band at 144 px, so the
+    // settled value is the target itself.
+    expect(mounted.bend.state.pull).toBeCloseTo(120, 0);
+  });
+
+  it("applies the touch resistance to a touch gesture", () => {
+    const mounted = mount({ ...settle, resistance: { wheel: 5, touch: 10 } });
+
+    window.dispatchEvent(touchEvent("touchstart", 600));
+    window.dispatchEvent(touchEvent("touchmove", 700));
+    frames(ARRIVE);
+
+    expect(mounted.bend.state.pull).toBeCloseTo(10, 1);
+  });
+
+  it("never crosses the limit under the ease curve", () => {
+    const mounted = mount({ ...settle, curve: "ease", max: { px: 60, ratio: 1 } });
+    for (let index = 0; index < 12; index += 1) {
+      wheel(-240);
+      frames(2);
+    }
+    frames(ARRIVE);
+
+    expect(mounted.bend.state.pull).toBeLessThan(60);
+    expect(mounted.bend.state.pull).toBeGreaterThan(40);
   });
 
   it("drops the pull when a click lands mid-band", () => {
@@ -205,12 +249,12 @@ describe("instance lifecycle", () => {
 
     wheel(-240);
     frames(40);
-    expect(seen.at(-1)).toBeCloseTo(80, 1);
+    expect(seen.at(-1)).toBeCloseTo(48, 1);
 
     unsubscribe();
     wheel(-240);
     frames(2);
-    expect(seen.at(-1)).toBeCloseTo(80, 1);
+    expect(seen.at(-1)).toBeCloseTo(48, 1);
   });
 
   it("returns to rest on pause and stops responding", () => {
@@ -246,7 +290,7 @@ describe("instance lifecycle", () => {
     const mounted = mount({ preset: "edge", render: "cssVar", releaseDelay: 10_000 });
     wheel(-240);
     frames(40);
-    expect(mounted.element.style.getPropertyValue("--bend-pull")).toBe("80.00px");
+    expect(mounted.element.style.getPropertyValue("--bend-pull")).toBe("48.00px");
     expect(mounted.element.style.transform).toBe("");
   });
 });

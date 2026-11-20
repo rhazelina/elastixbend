@@ -2,13 +2,28 @@
  * How much of a gesture distance becomes displacement.
  *
  * Linear division, deliberately: it is the shape the reference implementation
- * shipped with and the one that was tuned by hand. A progressive curve
- * (iOS-style `max * (1 - 1 / (1 + d / max))`) is a candidate for a later
- * release, but it changes the feel and needs its own tuning pass.
+ * shipped with and the one that was tuned by hand. `resistEase` below is the
+ * opt-in alternative.
  */
 export function resist(delta: number, resistance: number): number {
   if (resistance <= 0) return delta;
   return delta / resistance;
+}
+
+/**
+ * Linear division that saturates toward `limit`.
+ *
+ * `limit * (1 - exp(-d / limit))` starts with the same slope as `resist` and
+ * flattens as the gesture grows, so a long swipe keeps moving the band a
+ * little instead of pinning it. `resistance` still sets the slope, so the two
+ * curves stay tunable with the same number.
+ */
+export function resistEase(delta: number, resistance: number, limit: number): number {
+  const linear = resist(delta, resistance);
+  if (limit <= 0) return linear;
+  const magnitude = Math.abs(linear);
+  const eased = limit * (1 - Math.exp(-magnitude / limit));
+  return Math.sign(linear) * eased;
 }
 
 /**
