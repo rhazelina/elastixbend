@@ -4,7 +4,8 @@ import { clampToEdge, pullLimit as computePullLimit } from "./kernels/resistance
 import { resolveOptions, type ResolvedOptions } from "./options";
 import { createEdgePreset } from "./presets/edge";
 import { createSurfacePreset } from "./presets/surface";
-import type { Edge, PresetHost, PresetModule } from "./presets/types";
+import type { EdgeSide } from "./geometry";
+import type { PresetHost, PresetModule } from "./presets/types";
 import { createCssVarRenderer, createTransformRenderer, type Renderer } from "./renderers/index";
 import { schedule, unschedule } from "./scheduler";
 import { isScrollLocked } from "./scrollLock";
@@ -43,13 +44,13 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
     };
   }
 
-  const geometry = createGeometry();
+  const axis = resolved.axis;
+  const geometry = createGeometry(axis);
 
   if (resolved.render === "transform") {
     warnContractViolations(element, resolved);
   }
 
-  const axis = resolved.axis;
   const renderer: Renderer =
     resolved.render === "transform"
       ? createTransformRenderer(element, axis)
@@ -91,7 +92,7 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
       return pull;
     },
     pullLimit: limitForViewport,
-    clampPull(value: number, edge: Edge) {
+    clampPull(value: number, edge: EdgeSide) {
       return clampToEdge(value, limitForViewport(), edge);
     },
     setPull(value: number) {

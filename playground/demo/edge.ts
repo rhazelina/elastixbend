@@ -5,6 +5,8 @@ import { bare } from "./harness";
 
 const params = new URLSearchParams(location.search);
 const off = params.has("off");
+// The horizontal demo reuses this script; only the page marks the axis.
+const axis = document.body.dataset.axis === "x" ? "x" : "y";
 
 const stage = document.querySelector<HTMLElement>("#stage");
 const panel = document.querySelector<HTMLElement>("#controls");
@@ -39,6 +41,7 @@ function watch(instance: BendInstance): () => void {
 function optionsFrom(raw: Record<string, number> = {}): Parameters<typeof createBend>[1] {
   return {
     preset: "edge",
+    axis,
     debug: true,
     resistance: {
       wheel: raw.resistanceWheel ?? 5,

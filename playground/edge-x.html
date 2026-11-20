@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>elastixbend · edge x</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body data-axis="x" class="axis-x">
+    <main class="stage rail" id="stage">
+      <div class="rail-page">
+        <h1>Gulir ke kiri, lalu terus gulir</h1>
+        <p>
+          Sumbu horizontal. Konten tertarik ke kanan dengan tahanan, lalu memantul
+          balik saat gestur berhenti. Scroll tetap native.
+        </p>
+        <p class="note">
+          Untuk menggeser ke kiri di desktop: <code>Shift</code> + roda mouse,
+          trackpad dua jari, atau scrollbar bawah.
+        </p>
+      </div>
+      <div class="rail-panel">
+        <p>Bagian tengah. Di sini tidak ada efek.</p>
+      </div>
+      <div class="rail-panel">
+        <p>Hampir ujung kanan.</p>
+      </div>
+      <div class="rail-page rail-end">
+        <h2>Ujung kanan</h2>
+        <p>Terus gulir ke kanan untuk melihat tarikan ke arah sebaliknya.</p>
+      </div>
+    </main>
+
+    <dl class="readout" aria-live="off" id="readout">
+      <dt>pull</dt>
+      <dd><b id="pull">0.00</b> px</dd>
+      <dt>phase</dt>
+      <dd><b id="phase">idle</b></dd>
+    </dl>
+
+    <section class="controls-host" id="controls" aria-label="Parameter"></section>
+
+    <ul class="axis-nav" aria-label="Halaman">
+      <li><a href="/edge.html">vertical</a></li>
+      <li><a href="/">semua preset</a></li>
+    </ul>
+
+    <script type="module" src="/demo/edge.ts"></script>
+  </body>
+</html>

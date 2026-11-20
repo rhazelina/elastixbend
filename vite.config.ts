@@ -19,6 +19,7 @@ export default defineConfig({
       input: {
         index: fileURLToPath(new URL("./playground/index.html", import.meta.url)),
         edge: fileURLToPath(new URL("./playground/edge.html", import.meta.url)),
+        edgeX: fileURLToPath(new URL("./playground/edge-x.html", import.meta.url)),
         surface: fileURLToPath(new URL("./playground/surface.html", import.meta.url)),
       },
     },

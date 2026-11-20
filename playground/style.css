@@ -272,3 +272,81 @@ body.bare .controls-host {
     bottom: auto;
   }
 }
+
+/* ---------- horizontal demo ---------- */
+
+/* Body scrolls sideways here, so the sticky topbar would drift off screen.
+   The rail replaces it: panels lay out in a row and the document itself is
+   the scroll container, which is what `axis: "x"` measures. */
+.axis-x {
+  overscroll-behavior-x: none;
+}
+
+.rail {
+  display: flex;
+  align-items: center;
+  gap: 6vw;
+  width: max-content;
+  padding: 3rem 4vw;
+}
+
+.rail-page {
+  width: min(34rem, 80vw);
+  padding: 2rem 0;
+}
+
+.rail-page h1 {
+  font-size: clamp(1.6rem, 3.6vw, 2.2rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+}
+
+.rail-page h2 {
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem;
+}
+
+.rail-page p,
+.rail-panel p {
+  color: var(--muted);
+  margin: 0 0 1rem;
+}
+
+.rail-page .note {
+  border-left: 2px solid var(--rule);
+  padding-left: 1rem;
+  font-size: 0.94rem;
+}
+
+.rail-panel {
+  width: min(22rem, 60vw);
+  padding: 1.5rem;
+  border: 1px dashed var(--rule);
+  border-radius: 6px;
+}
+
+.axis-nav {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 20;
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  list-style: none;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.74rem;
+}
+
+.axis-nav a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.axis-nav a:hover {
+  text-decoration: underline;
+}

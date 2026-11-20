@@ -236,3 +236,25 @@ rather than as weight. The saturation curve keeps the first part of the pull
 linear and gives diminishing returns after that, so the band never quite reaches
 the limit. It is opt-in because it changes the feel and has not been tuned on
 device yet.
+
+## D15. The axis belongs to geometry, not to the renderer
+
+`axis` was already wired to the transform and to `normalizeWheel`, which made it
+look done. It was not: `createGeometry` read `scrollHeight`, `clientHeight`, and
+`window.scrollY` unconditionally, so on `axis: "x"` the presets were measuring
+the vertical document and clamping a horizontal pull against the wrong limit.
+
+The fix is one parameter, but the placement matters. The axis is fixed at
+creation and handed to the geometry, because a horizontal page and a vertical
+page have different scroll ranges and one geometry cannot report both without a
+second layout read per watcher.
+
+Two other places had the same assumption. Touch read `clientY` only, and the
+edge presets called their sides `"top"` and `"bottom"`. The sides are now
+`"start"` and `"end"`, matching `edgeAt`, so a horizontal pull is not named after
+an edge it does not have. `clampToEdge` takes the same values; it is exported, so
+this is a breaking rename for anyone calling it directly.
+
+The touch sign did not need to flip. On both axes the finger direction and the
+content direction agree: down and right pull the band positive, up and left pull
+it negative. Only the coordinate being read changes.

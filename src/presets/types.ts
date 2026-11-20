@@ -1,8 +1,7 @@
-import type { Geometry } from "../geometry";
+import type { EdgeSide, Geometry } from "../geometry";
 import type { ResolvedOptions } from "../options";
 import type { Axis } from "../types";
 
-export type Edge = "top" | "bottom";
 
 export interface PresetHost {
   readonly options: ResolvedOptions;
@@ -15,7 +14,7 @@ export interface PresetHost {
   /** Ceiling for the pull on the current viewport. */
   pullLimit(): number;
   /** Direction-aware clamp against `pullLimit()`. */
-  clampPull(value: number, edge: Edge): number;
+  clampPull(value: number, edge: EdgeSide): number;
   /** Apply displacement for this frame. Moves the machine into `pulling`. */
   setPull(value: number): void;
   /** Spring back to zero, carrying the gesture velocity. */

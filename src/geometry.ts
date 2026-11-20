@@ -1,7 +1,9 @@
+import type { Axis } from "./types";
+
 export interface Geometry {
-  /** Document scroll offset. Reading it does not force layout. */
+  /** Document scroll offset on the instance's axis. Reading it does not force layout. */
   readonly offset: number;
-  /** Maximum scroll offset. Cached until something invalidates it. */
+  /** Maximum scroll offset on the instance's axis. Cached until something invalidates it. */
   readonly limit: number;
   /** Re-measure now, then notify watchers. */
   refresh(): void;
@@ -35,15 +37,22 @@ function scrollRoot(): Element {
  * The observers belong to the geometry, not to whoever happens to be watching,
  * so a watcher that triggers a re-measure can never re-enter itself: `refresh`
  * only runs the subscriber list after the new limit is already stored.
+ *
+ * The axis is fixed at creation for the same reason the options are: a
+ * horizontal page and a vertical page measure different scroll ranges, and one
+ * geometry cannot report both without a second layout read per watcher.
  */
-export function createGeometry(): Geometry {
+export function createGeometry(axis: Axis = "y"): Geometry {
+  const sizeKey = axis === "y" ? "scrollHeight" : "scrollWidth";
+  const clientKey = axis === "y" ? "clientHeight" : "clientWidth";
+
   let limit = measureLimit();
   const watchers = new Set<() => void>();
   let observer: ResizeObserver | null = null;
 
   function measureLimit(): number {
     const root = scrollRoot();
-    return Math.max(0, root.scrollHeight - root.clientHeight);
+    return Math.max(0, root[sizeKey] - root[clientKey]);
   }
 
   function refresh(): void {
@@ -64,7 +73,7 @@ export function createGeometry(): Geometry {
 
   return {
     get offset() {
-      return window.scrollY;
+      return axis === "y" ? window.scrollY : window.scrollX;
     },
     get limit() {
       return limit;

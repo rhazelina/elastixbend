@@ -1,3 +1,5 @@
+import type { EdgeSide } from "../geometry";
+
 /**
  * How much of a gesture distance becomes displacement.
  *
@@ -35,10 +37,10 @@ export function pullLimit(px: number, ratio: number, viewport: number): number {
 }
 
 /**
- * Direction-aware clamp. `top` keeps the pull positive (content follows a
- * downward pull), `bottom` keeps it negative.
+ * Direction-aware clamp. `start` is the top or left edge of the axis and keeps
+ * the pull positive, `end` is the bottom or right edge and keeps it negative.
  */
-export function clampToEdge(value: number, limit: number, edge: "top" | "bottom"): number {
-  if (edge === "top") return Math.max(0, Math.min(limit, value));
+export function clampToEdge(value: number, limit: number, edge: EdgeSide): number {
+  if (edge === "start") return Math.max(0, Math.min(limit, value));
   return Math.max(-limit, Math.min(0, value));
 }

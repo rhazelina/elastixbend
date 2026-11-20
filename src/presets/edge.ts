@@ -1,7 +1,7 @@
-import { edgeAt } from "../geometry";
+import { edgeAt, type EdgeSide } from "../geometry";
 import { createVelocityTracker, normalizeWheel } from "../input";
 import { resist, resistEase } from "../kernels/resistance";
-import type { Edge, PresetHost, PresetModule } from "./types";
+import type { PresetHost, PresetModule } from "./types";
 
 /** A flick should not throw the band across the screen, whatever the device. */
 const MAX_CARRY = 2400;
@@ -10,7 +10,7 @@ const MAX_CARRY = 2400;
 type InputClass = "wheel" | "touch";
 
 /**
- * Pull at the top or bottom of the document.
+ * Pull at the start or end edge of the document along the instance's axis.
  *
  * Only wheel and touch are handled here. Native scroll keeps doing the actual
  * scrolling; we never write scroll position, so a smooth-scroll library on the
@@ -31,7 +31,7 @@ export function createEdgePreset(host: PresetHost): PresetModule {
   const { releaseDelay } = host.options;
   const tracker = createVelocityTracker();
 
-  let edge: Edge | null = null;
+  let edge: EdgeSide | null = null;
   /** Cumulative gesture distance for this engage, in raw CSS pixels. */
   let gesture = 0;
   let active = false;
@@ -41,7 +41,7 @@ export function createEdgePreset(host: PresetHost): PresetModule {
   /** Where the band belongs for the gesture collected so far. */
   function target(): number {
     if (edge === null) return 0;
-    const direction = edge === "top" ? 1 : -1;
+    const direction = edge === "start" ? 1 : -1;
     const resistance = host.options.resistance[input];
     const shaped =
       host.options.curve === "ease"
@@ -60,8 +60,8 @@ export function createEdgePreset(host: PresetHost): PresetModule {
     if (active) pursue();
   });
 
-  const atTop = () => edgeAt(host.geometry.offset, host.geometry.limit) === "start";
-  const atBottom = () => edgeAt(host.geometry.offset, host.geometry.limit) === "end";
+  const atStart = () => edgeAt(host.geometry.offset, host.geometry.limit) === "start";
+  const atEnd = () => edgeAt(host.geometry.offset, host.geometry.limit) === "end";
 
   function cancelTimer(): void {
     if (timer === null) return;
@@ -77,7 +77,7 @@ export function createEdgePreset(host: PresetHost): PresetModule {
     }, releaseDelay);
   }
 
-  function begin(nextEdge: Edge, nextInput: InputClass): void {
+  function begin(nextEdge: EdgeSide, nextInput: InputClass): void {
     // A different input class mid-gesture is a new gesture: the two classes
     // have different resistance, so keeping the sum would make the band jump.
     if (edge !== nextEdge || input !== nextInput) {
@@ -117,11 +117,11 @@ export function createEdgePreset(host: PresetHost): PresetModule {
 
     const inward = delta > 0;
 
-    if (atTop() && !inward) {
-      begin("top", "wheel");
+    if (atStart() && !inward) {
+      begin("start", "wheel");
       gesture += Math.abs(delta);
-    } else if (atBottom() && inward) {
-      begin("bottom", "wheel");
+    } else if (atEnd() && inward) {
+      begin("end", "wheel");
       gesture += Math.abs(delta);
     } else if (active) {
       release();
@@ -134,8 +134,11 @@ export function createEdgePreset(host: PresetHost): PresetModule {
   }
 
   // Touch is read as a gesture delta: the finger moving down pulls the content
-  // down, so the sign already matches the displacement.
-  let touchY = 0;
+  // down, so the sign already matches the displacement. On the x axis the same
+  // holds with `clientX`, and the sign still means "toward the end edge".
+  const touchPoint = (touch: Touch): number => (host.axis === "y" ? touch.clientY : touch.clientX);
+
+  let touchStart = 0;
   let touching = false;
 
   function onTouchStart(event: TouchEvent): void {
@@ -145,7 +148,7 @@ export function createEdgePreset(host: PresetHost): PresetModule {
       return;
     }
     touching = true;
-    touchY = touch.clientY;
+    touchStart = touchPoint(touch);
     tracker.reset();
     cancelTimer();
   }
@@ -154,16 +157,17 @@ export function createEdgePreset(host: PresetHost): PresetModule {
     const touch = event.touches[0];
     if (!touching || !touch || event.touches.length !== 1) return;
 
-    const delta = touch.clientY - touchY;
-    touchY = touch.clientY;
+    const point = touchPoint(touch);
+    const delta = point - touchStart;
+    touchStart = point;
     if (delta === 0) return;
     if (host.isNested(event.target, host.axis, delta)) return;
 
-    if (atTop() && delta > 0) {
-      begin("top", "touch");
+    if (atStart() && delta > 0) {
+      begin("start", "touch");
       gesture += Math.abs(delta);
-    } else if (atBottom() && delta < 0) {
-      begin("bottom", "touch");
+    } else if (atEnd() && delta < 0) {
+      begin("end", "touch");
       gesture += Math.abs(delta);
     } else if (active) {
       release();
@@ -193,7 +197,7 @@ export function createEdgePreset(host: PresetHost): PresetModule {
   // Keyboard, scrollbar, and programmatic scrolls can leave a stale pull.
   function onScroll(): void {
     if (!active) return;
-    if (edgeAt(host.geometry.offset, host.geometry.limit) !== (edge === "top" ? "start" : "end")) {
+    if (edgeAt(host.geometry.offset, host.geometry.limit) !== edge) {
       release();
     }
   }

@@ -1,6 +1,6 @@
 # elastixbend: specification
 
-Version: `0.1.2`. This document is the contract. Anything not written here is not
+Version: `0.2.0`. This document is the contract. Anything not written here is not
 promised, including internals, file layout, and the exact numbers behind the
 defaults.
 
@@ -55,7 +55,7 @@ The instance does not touch the DOM until the first gesture.
 ```ts
 interface BendOptions {
   preset?: "edge" | "surface";        // default "edge"
-  axis?: "x" | "y";                   // default "y"
+  axis?: "x" | "y";                   // default "y", both presets
   resistance?: number | { wheel?: number; touch?: number };
                                       // default { wheel: 5, touch: 3 }
   curve?: "linear" | "ease";          // default "linear"
@@ -145,9 +145,10 @@ the same scheduler, spring integrator, clamp, and renderer.
 
 Displacement at the document edges, driven by wheel and touch.
 
-- At the **top** edge, a wheel/touch gesture directed further up produces a
-  **positive** pull (content moves down, revealing space).
-- At the **bottom** edge, a gesture directed further down produces a **negative**
+- At the **start** edge (top, or left on `axis: "x"`), a wheel/touch gesture
+  directed further outward produces a **positive** pull (content moves down or
+  right, revealing space).
+- At the **end** edge, a gesture directed further outward produces a **negative**
   pull.
 - Any gesture pointing **into** the page scrolls normally and produces no pull.
 - Resistance is applied to the **cumulative** gesture distance, never to a single
@@ -254,8 +255,6 @@ Not implemented:
 - Smooth scrolling / scroll hijacking, in any form.
 - A Lenis adapter or any scroll-library compatibility layer.
 - `drag` preset (rubber-band on pointer drag). `surface` ships `lean` only.
-- Horizontal (`axis: "x"`) presets. The axis option exists and is honoured by
-  the renderer and clamp, but neither shipped preset listens to horizontal input.
 - Custom presets from outside the package.
 - SSE/SSR rendering of the effect. Importing is SSR-safe; the effect does nothing
   until `createBend` is called in a browser.

@@ -8,6 +8,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- `axis: "x"` now works in both presets. Geometry, the edge clamp, and touch
+  input all follow the configured axis instead of reading the vertical document.
 - `resistance` accepts `{ wheel, touch }` so the two input classes can be tuned
   apart. Defaults are `{ wheel: 5, touch: 3 }`.
 - `curve: "linear" | "ease"`, default `"linear"`. `ease` saturates toward the
@@ -15,6 +17,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Breaking for direct callers:** `clampToEdge` takes `"start"` / `"end"`
+  instead of `"top"` / `"bottom"`, matching `edgeAt`.
 - Docs rewritten for a consistent voice; no runtime change.
 - **Feel change:** the default wheel resistance is 5, where `resistance` was
   previously one number at 3. Same resistance on wheel now needs

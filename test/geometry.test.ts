@@ -1,6 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createGeometry, edgeAt } from "../src/geometry";
 
+function setScrollX(total: number, viewport: number, offset = 0): void {
+  Object.defineProperty(document.documentElement, "scrollWidth", {
+    configurable: true,
+    value: total,
+  });
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    configurable: true,
+    value: viewport,
+  });
+  Object.defineProperty(window, "innerWidth", { configurable: true, value: viewport });
+  Object.defineProperty(window, "scrollX", {
+    configurable: true,
+    get: () => offset,
+  });
+}
+
 function setScroll(total: number, viewport: number): void {
   Object.defineProperty(document.documentElement, "scrollHeight", {
     configurable: true,
@@ -88,6 +104,30 @@ describe("createGeometry", () => {
     setScroll(5000, 800);
     geometry.refresh();
     expect(calls).toBe(0);
+  });
+});
+
+describe("createGeometry on the x axis", () => {
+  it("measures the horizontal limit", () => {
+    setScrollX(4000, 1200);
+    const geometry = createGeometry("x");
+    expect(geometry.limit).toBe(2800);
+    geometry.destroy();
+  });
+
+  it("reads the horizontal offset", () => {
+    setScrollX(4000, 1200, 640);
+    const geometry = createGeometry("x");
+    expect(geometry.offset).toBe(640);
+    geometry.destroy();
+  });
+
+  it("ignores the vertical scroll range", () => {
+    setScroll(9000, 800);
+    setScrollX(4000, 1200);
+    const geometry = createGeometry("x");
+    expect(geometry.limit).toBe(2800);
+    geometry.destroy();
   });
 });
 

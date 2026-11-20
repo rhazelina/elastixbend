@@ -58,14 +58,14 @@ describe("pullLimit", () => {
 });
 
 describe("clampToEdge", () => {
-  it("keeps the top edge pull positive", () => {
-    expect(clampToEdge(-40, 120, "top")).toBe(0);
-    expect(clampToEdge(400, 120, "top")).toBe(120);
+  it("keeps the start edge pull positive", () => {
+    expect(clampToEdge(-40, 120, "start")).toBe(0);
+    expect(clampToEdge(400, 120, "start")).toBe(120);
   });
 
-  it("keeps the bottom edge pull negative", () => {
-    expect(clampToEdge(40, 120, "bottom")).toBe(0);
-    expect(clampToEdge(-400, 120, "bottom")).toBe(-120);
+  it("keeps the end edge pull negative", () => {
+    expect(clampToEdge(40, 120, "end")).toBe(0);
+    expect(clampToEdge(-400, 120, "end")).toBe(-120);
   });
 });
 

@@ -22,6 +22,23 @@ function setupScroll(offset: number, total = 3000, viewport = 800): void {
   });
 }
 
+function setupScrollX(offset: number, total = 4000, viewport = 1200): void {
+  scrollOffset = offset;
+  Object.defineProperty(document.documentElement, "scrollWidth", {
+    configurable: true,
+    value: total,
+  });
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    configurable: true,
+    value: viewport,
+  });
+  Object.defineProperty(window, "innerWidth", { configurable: true, value: viewport });
+  Object.defineProperty(window, "scrollX", {
+    configurable: true,
+    get: () => scrollOffset,
+  });
+}
+
 function scrollTo(offset: number): void {
   scrollOffset = offset;
   window.dispatchEvent(new Event("scroll"));
@@ -41,6 +58,10 @@ function touchEvent(type: string, clientY: number): Event {
     value: type === "touchend" || type === "touchcancel" ? [] : [{ clientY }],
   });
   return event;
+}
+
+function wheelX(deltaX: number): void {
+  window.dispatchEvent(new WheelEvent("wheel", { deltaX, cancelable: true }));
 }
 
 function frames(count = 1): void {
@@ -203,6 +224,35 @@ describe("edge preset", () => {
 
     expect(mounted.bend.state.pull).toBeLessThan(60);
     expect(mounted.bend.state.pull).toBeGreaterThan(40);
+  });
+
+  it("pulls along the x axis when axis is x", () => {
+    setupScrollX(0);
+    const mounted = mount({ ...settle, axis: "x" });
+    wheelX(-240);
+    frames(ARRIVE);
+
+    expect(mounted.bend.state.pull).toBeCloseTo(48, 1);
+    expect(mounted.element.style.transform).toContain("translate3d(48");
+  });
+
+  it("pulls back at the end of the x axis", () => {
+    setupScrollX(2800);
+    const mounted = mount({ ...settle, axis: "x" });
+    wheelX(240);
+    frames(ARRIVE);
+
+    expect(mounted.bend.state.pull).toBeCloseTo(-48, 1);
+    expect(mounted.element.style.transform).toContain("translate3d(-48");
+  });
+
+  it("ignores vertical input on the x axis", () => {
+    setupScrollX(0);
+    const mounted = mount({ ...settle, axis: "x" });
+    wheel(-240);
+    frames(ARRIVE);
+
+    expect(mounted.bend.state.pull).toBe(0);
   });
 
   it("drops the pull when a click lands mid-band", () => {

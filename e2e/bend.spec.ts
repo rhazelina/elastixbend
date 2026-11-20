@@ -56,6 +56,49 @@ test.describe("edge preset", () => {
   });
 });
 
+test.describe("edge preset on the x axis", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/edge-x.html");
+    await page.waitForFunction(() => document.querySelector("#pull") !== null);
+  });
+
+  test("pulls sideways past the left edge", async ({ page }) => {
+    await page.mouse.move(400, 300);
+    await page.evaluate(() => {
+      window.dispatchEvent(
+        new WheelEvent("wheel", { deltaX: -600, bubbles: true, cancelable: true }),
+      );
+    });
+
+    await expect.poll(() => readPull(page)).toBeGreaterThan(4);
+    await expect.poll(() => readPhase(page), { timeout: 3000 }).toBe("idle");
+    await expect.poll(() => readPull(page)).toBe(0);
+  });
+
+  test("does nothing when scrolling right from the start", async ({ page }) => {
+    await page.mouse.move(400, 300);
+    await page.evaluate(() => {
+      window.dispatchEvent(
+        new WheelEvent("wheel", { deltaX: 600, bubbles: true, cancelable: true }),
+      );
+    });
+    await page.waitForTimeout(200);
+
+    expect(await readPull(page)).toBe(0);
+  });
+
+  test("never writes the horizontal scroll position", async ({ page }) => {
+    await page.evaluate(() => {
+      window.dispatchEvent(
+        new WheelEvent("wheel", { deltaX: -600, bubbles: true, cancelable: true }),
+      );
+    });
+    await page.waitForTimeout(160);
+
+    expect(await page.evaluate(() => window.scrollX)).toBe(0);
+  });
+});
+
 test.describe("reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 
