@@ -78,11 +78,34 @@
   border-radius: 2px;
 }
 
-.vp-doc table {
-  display: table;
-  width: 100%;
+/*
+ * Tables: full width once there is room, horizontally scrollable on narrow
+ * screens with enough column width to stay readable.
+ */
+@media (min-width: 768px) {
+  .vp-doc table {
+    display: table;
+    width: 100%;
+  }
+
+  .vp-doc th {
+    white-space: nowrap;
+  }
 }
 
-.vp-doc th {
-  white-space: nowrap;
+@media (max-width: 767px) {
+  .vp-doc table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vp-doc th,
+  .vp-doc td {
+    min-width: 7.5rem;
+  }
+
+  .vp-doc th {
+    white-space: nowrap;
+  }
 }
