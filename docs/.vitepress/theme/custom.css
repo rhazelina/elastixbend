@@ -1,0 +1,88 @@
+/*
+ * The palette mirrors the playground so the docs and the demos read as one
+ * project: warm paper, near-black ink, rust accent.
+ */
+
+:root {
+  --vp-c-brand-1: #9a3412;
+  --vp-c-brand-2: #b4451a;
+  --vp-c-brand-3: #c2542a;
+  --vp-c-brand-soft: rgba(154, 52, 18, 0.14);
+
+  --vp-c-bg: #fbf9f4;
+  --vp-c-bg-alt: #f4f1ea;
+  --vp-c-bg-soft: #f0ece2;
+  --vp-c-bg-elv: #fffdf8;
+
+  --vp-c-text-1: #17150f;
+  --vp-c-text-2: #4a443a;
+  --vp-c-text-3: #6a6357;
+
+  --vp-c-divider: #d5cfc2;
+  --vp-c-gutter: #e6e0d4;
+  --vp-c-border: #d5cfc2;
+
+  --vp-font-family-base: "Inter", ui-sans-serif, system-ui, "Segoe UI", Roboto,
+    sans-serif;
+  --vp-font-family-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(
+    120deg,
+    #9a3412 25%,
+    #d97706 100%
+  );
+}
+
+.dark {
+  --vp-c-brand-1: #f0a07a;
+  --vp-c-brand-2: #e2703a;
+  --vp-c-brand-3: #c2542a;
+  --vp-c-brand-soft: rgba(226, 112, 58, 0.16);
+
+  --vp-c-bg: #16171d;
+  --vp-c-bg-alt: #1c1d24;
+  --vp-c-bg-soft: #1f2028;
+  --vp-c-bg-elv: #22232b;
+
+  --vp-c-text-1: #f3f1ec;
+  --vp-c-text-2: #c3bfb5;
+  --vp-c-text-3: #8d887d;
+
+  --vp-c-divider: #2e303a;
+  --vp-c-gutter: #22232b;
+  --vp-c-border: #2e303a;
+
+  --vp-home-hero-name-background: linear-gradient(
+    120deg,
+    #f0a07a 25%,
+    #fbbf24 100%
+  );
+}
+
+.VPHero .name {
+  letter-spacing: -0.03em;
+}
+
+.VPHero .text {
+  letter-spacing: -0.02em;
+}
+
+/*
+ * The playground treats focus as a first-class state, so keep the ring visible
+ * and consistent here instead of relying on the browser default.
+ */
+:focus-visible {
+  outline: 2px solid var(--vp-c-brand-2);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.vp-doc table {
+  display: table;
+  width: 100%;
+}
+
+.vp-doc th {
+  white-space: nowrap;
+}
