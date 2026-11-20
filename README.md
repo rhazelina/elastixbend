@@ -29,23 +29,20 @@ const bend = createBend(document.querySelector("#stage")!, {
 bend.destroy();
 ```
 
-That is the whole basic setup. `#stage` gets a `translate3d` while you pull past
+That's the whole basic setup. `#stage` gets a `translate3d` while you pull past
 the top or bottom of the page.
 
 ### What "identical" means here
 
 The displacement belongs to this library, not to your input device.
 
-- Resistance applies to the **total gesture distance**, never to a single event.
-  One 240 px wheel tick and twenty-four 10 px touch moves produce the same
-  target.
-- The band never jumps to that target. A spring chases it on a fixed 1/240 s
-  substep, so the motion you see comes from the integrator, not from event
-  cadence or refresh rate.
+- Resistance applies to the **total gesture distance**. One 240 px wheel tick and
+  twenty-four 10 px touch moves produce the same target.
+- A spring chases that target on a fixed 1/240 s substep, so the motion you see
+  comes from the integrator rather than event cadence or refresh rate.
 
 A stiff trackpad, a stepped mouse wheel, and a finger on a phone all arrive at
-the same place. This is not a claim to feel like a smooth-scroll library; those
-interpolate scroll position, which this package refuses to touch.
+the same place.
 
 ### `preset: "surface"`
 
@@ -88,7 +85,7 @@ function App() {
 }
 ```
 
-Reading the pull per frame does not re-render:
+Reading the pull per frame doesn't re-render:
 
 ```tsx
 function Child() {
@@ -104,15 +101,15 @@ function Child() {
 }
 ```
 
-There is deliberately no `useState(pull)`. A 60 Hz React re-render is the exact
-cost this library exists to avoid.
+There's no `useState(pull)`. A 60 Hz React re-render is the exact cost this
+library exists to avoid.
 
 ---
 
 ## Reduced motion
 
-`prefers-reduced-motion: reduce` makes the effect **inert**: no listeners, no
-animation, state stays idle. Not a slower spring. No motion at all.
+`prefers-reduced-motion: reduce` makes the effect inert. It installs no listeners
+and nothing animates; state stays idle. A slower spring would still be motion.
 
 ```ts
 createBend(el, { respectReducedMotion: false }); // opt out
@@ -128,26 +125,25 @@ Read these before shipping.
    already has a transform, use `render: "cssVar"`.
 2. **`transform` creates a containing block.** A `position: fixed` child inside
    the target will move with the band. Check before wrapping a page shell.
-3. **It is not a smooth-scroll library.** It does not and will not smooth scroll.
-   If you want smooth scrolling, use one; this coexists with it by design, but
-   does not replace it.
-4. **No Lenis adapter.** See `DECISIONS.md` D2. `surface` behaves better next to
-   a smooth-scroll library than `edge` does, because it reads position instead of
-   wheel events.
+3. **It doesn't smooth scroll.** If you want that, run a smooth-scroll library
+   next to it. `surface` is the preset that tolerates one.
+4. **No Lenis adapter.** `surface` works next to a smooth-scroll library because
+   it reads scroll position. `edge` reads wheel events, so the two will double up.
+   See `DECISIONS.md` D2.
 5. **Options are immutable.** No `setOptions`. Destroy and recreate.
-6. **`axis: "x"` is wired but no preset listens to horizontal input yet.** Use it
-   with your own driver, or don't.
+6. **`axis: "x"` is wired but no preset listens to horizontal input.** Use it with
+   your own driver.
 7. **Only wheel and touch drive `edge`.** Keyboard scrolling and scrollbar drags
-   release the band rather than driving it. That is intended: they are not
-   gestures you can rubber-band.
-8. **No custom presets in `0.1.0`.** The host interface is typed but not exported.
+   release the band rather than driving it. That's intended: they aren't gestures
+   you can rubber-band.
+8. **No custom presets.** The host interface is typed but not exported.
 
 ---
 
 ## Measured
 
-Measured on this machine (Linux, Node 26, Chromium headless via Playwright), not
-claimed. Reproduce with `npm run size` and `npm run measure`.
+Measured on this machine: Linux, Node 26, Chromium headless via Playwright.
+Reproduce with `npm run size` and `npm run measure`.
 
 ### Bundle size
 
@@ -183,21 +179,19 @@ last frame already returned `false`.
 `style.willChange`.** It is bounded by the number of frames that actually move,
 not by input event count, and it does not show up as frame drops. Since `0.1.2`
 the band moves on every frame of the chase rather than jumping once, so the
-recalc count is higher (26 vs 16) while script time is unchanged. That is the
+recalc count is higher (26 vs 16) while script time is unchanged. That's the
 cost of the spring owning the motion, and it stays inside the same frame budget.
 
 ### Not measured
 
-**Composited layer size.** CDP's `LayerTree.layerTreeDidChange` emits zero events
-in headless Chromium, verified with a probe across page loads, gestures, and
-layer tree enables. Rather than report a fabricated number, this stays a manual
-DevTools → Layers panel check. `transform` on the target should promote one layer
-sized to the target's border box; if your target is the whole page, that is a
-full-viewport layer, which is the same cost a smooth-scroll library pays.
+**Composited layer size.** CDP's `LayerTree.layerTreeDidChange` emits no events in
+headless Chromium, so this stays a manual DevTools → Layers check. `transform` on
+the target should promote one layer sized to the target's border box. If your
+target is the whole page, that's a full-viewport layer, the same cost a
+smooth-scroll library pays.
 
-Frame timings in headless Chromium are noisy. They are indicative and are not
-wired to a CI threshold, because a threshold there would flap. Only "loop settles" and
-the size budgets are hard gates.
+Headless frame timings are noisy, so they aren't wired to a CI threshold. Only
+"loop settles" and the size budgets are hard gates.
 
 ---
 
@@ -244,7 +238,7 @@ Defaults: `resistance: 3`, `max: { px: 120, ratio: 0.18 }`,
 npm install
 npm run dev        # playground at :5173 (index / edge / surface)
 npm run typecheck
-npm run test       # 74 unit tests, jsdom
+npm run test       # 76 unit tests, jsdom
 npm run test:e2e   # Playwright, needs `npx playwright install chromium`
 npm run build      # tsup → dist/ (ESM + .d.ts)
 npm run size       # size-limit gate

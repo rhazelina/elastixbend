@@ -6,7 +6,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Nothing yet.
+### Changed
+
+- Docs rewritten for a consistent voice; no runtime change.
 
 ## [0.1.2] - 2026-11-20
 

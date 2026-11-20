@@ -5,7 +5,7 @@ choice from an accident.
 
 ---
 
-## D1. `surface` means `lean`, not `drag`
+## D1. `surface` reads scroll position
 
 A rubber-band effect can be driven two ways:
 
@@ -18,12 +18,12 @@ A rubber-band effect can be driven two ways:
 `drag` cannot satisfy constraint C1 (never cancel a gesture). It also conflicts
 with native touch scrolling in a way no amount of `touch-action` styling fixes
 cleanly. `lean` gets most of the perceived weight and is compatible with the
-hard constraint, so `0.1.0` ships `lean` only.
+hard constraint, so the first release ships `lean` only.
 
 `lean` is also the reason `surface` needs no input listeners at all: one passive
 `scroll` listener is enough.
 
-## D2. Lenis is ignored, not integrated
+## D2. No Lenis adapter
 
 The effect ran next to Lenis in the host project, and the two fought:
 `RubberBandScroll` pulled on the same wheel events Lenis was smoothing, so the
@@ -41,7 +41,7 @@ Instead the library obeys C2 and C4: it never writes scroll position and never
 cancels gestures, so any scroll owner (native, Lenis, or something else) stays
 authoritative. Whether the combination *feels* good is the consumer's call, and
 `surface` (which reads position) behaves better next to a smooth-scroll library
-than `edge` (which reads wheel events) does. That is documented, not hidden.
+than `edge` (which reads wheel events) does.
 
 ## D3. `transform` is the default renderer
 
@@ -53,9 +53,9 @@ Three candidates:
 | `cssVar` | exact | needs one CSS line from the consumer; not composited unless the CSS says so |
 | `margin`/`top` | wrong (layout per frame) | disqualified by C6 |
 
-`transform` needs no setup, so the first-run experience is "it just works". Its
-two consequences are real and silent, so they are documented in `SPEC.md` §6.1
-and detected by `debug` at creation. `cssVar` exists for pages that already
+`transform` needs no setup, so the first example is three lines. Neither
+consequence shows up in the DOM, so `debug` reports both at creation and
+`SPEC.md` §6.1 documents them. `cssVar` exists for pages that already
 transform the element or pin `position: fixed` children inside it.
 
 ## D4. Zero runtime dependencies
@@ -106,7 +106,7 @@ machine returns to `idle` (C7).
 Measured: the scheduler task count reads `0` within ~0.5 s of the last gesture on
 both presets (see README's measurement table).
 
-## D8. Reduced motion is inert, not slower
+## D8. Reduced motion installs nothing
 
 A slow spring is still motion, and still causes the vestibular discomfort the
 media query exists to prevent. Under `reduce`, `createBend` returns an instance
@@ -121,7 +121,7 @@ No `setOptions`. A live option channel means:
 - a partial update has to reconcile against a previous resolved config,
 - `useEffect` dependency arrays become the consumer's problem.
 
-Destroy and recreate instead. It is one line, and the cost is visible.
+Destroy and recreate instead. It's one line, and the cost is visible.
 
 ## D10. Naming
 
@@ -131,28 +131,23 @@ Destroy and recreate instead. It is one line, and the cost is visible.
 - `createBend` is long, so `const bend = createBend(el)` is the recommended
   local pattern.
 
-## D11. Measurement is a gate, not a claim
-
-The plan asked for size and frame-cost numbers that are measured. Two things
-followed:
+## D11. Measured numbers and their limits
 
 1. **Bundle size** is checked with `size-limit` against real built output, and
    the raw gzip of the minified bundle is recorded too. The tool's number is
-   *brotli, bundled, with dependencies*; the README reports both so nobody quotes
+   brotli, bundled, with dependencies; the README reports both so nobody quotes
    the wrong unit.
-2. **Composited layer size** is *not* measured. CDP's
-   `LayerTree.layerTreeDidChange` emits nothing in headless Chromium (verified by
-   probe: 0 events across page loads and gestures), so it is recorded as
-   unverified rather than reported as a pass. It stays a manual DevTools Layers
-   check.
+2. **Composited layer size** is not measured. CDP's
+   `LayerTree.layerTreeDidChange` emits nothing in headless Chromium, so it stays
+   a manual DevTools Layers check.
 
 Frame timing in headless Chromium is noisy, so the perf script takes three runs
-and reports the median plus the over-32 ms count. It is not wired to a CI
+and reports the median plus the over-32 ms count. It isn't wired to a CI
 threshold, because a headless CI machine would make it flap.
 
-## D12. Two bugs found by the measurement gate, and what changed
+## D12. Bugs the measurement gate found
 
-Recording this because both were invisible to the tests that existed.
+None of these were visible to the tests that existed.
 
 **Style recalculation per wheel event.** `isBlocked()` called `getComputedStyle`
 on `html` and `body` for every wheel event to detect a scroll lock. That is 16
@@ -183,9 +178,8 @@ the band was moving. It now samples the band's own displacement each frame.
 **`surface` stranded a lean.** The spring settled onto a non-zero target, the
 machine went `idle`, the frame loop slept, and the preset's decay logic, which
 only runs inside a frame, never ran again. The content stayed offset forever.
-Found by probing the settle path directly, not by an assertion that already
-existed. `tick` now only goes idle on a **zero** target, and a slow-scroll
-regression test covers it.
+Found by probing the settle path directly. `tick` now only goes idle on a **zero**
+target, and a slow-scroll regression test covers it.
 
 ## D13. The band owns its motion, not the input
 
@@ -199,7 +193,7 @@ The preset now keeps a cumulative `gesture` distance and converts it to a
 target. The spring chases that target, so the rendered displacement is produced
 by our integrator on a fixed 1/240 s substep, at any refresh rate.
 
-Two properties follow, and both are tests rather than claims:
+Properties covered by tests:
 
 1. **Event cadence does not matter.** One 240 px tick and twenty-four 10 px
    moves reach the same settled pull.
@@ -208,13 +202,10 @@ Two properties follow, and both are tests rather than claims:
    precise one converge to the same place. Density, event frequency, and frame
    rate stop being inputs to the feel.
 
-This is also why the library will not chase Lenis. Lenis interpolates the
-**scroll position itself**, which C1 forbids. What can be owned without touching
-scroll is the displacement, and that is what this decision puts under our
-control: however stiff or wild the underlying scroll is, the band behaves the
-way this package defines, identically.
+This is also why there is no Lenis adapter (D2): Lenis interpolates scroll
+position, which C1 forbids. The displacement is the part that can be owned
+without touching scroll.
 
 The cost is one frame of lag between a wheel event and the first visible
-movement, because the first scheduled frame carries no `dt`. That is below the
-perceptual threshold for a gesture that is already being interpolated, and it is
-the price of not letting event timing shape the motion.
+movement, because the first scheduled frame carries no `dt`. That's below the
+perceptual threshold for a gesture that's already being interpolated.

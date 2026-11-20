@@ -1,6 +1,6 @@
 # elastixbend: specification
 
-Version: `0.1.0`. This document is the contract. Anything not written here is not
+Version: `0.1.2`. This document is the contract. Anything not written here is not
 promised, including internals, file layout, and the exact numbers behind the
 defaults.
 
@@ -121,7 +121,7 @@ DEFAULT_* constants, and all public types.
 ```
 
 The preset host interface (`PresetHost`, `PresetModule`) is internal. It is
-typed but not exported, so a custom preset is not supported in `0.1.0`.
+typed but not exported, so a custom preset is not supported.
 
 ## 5. Presets
 
@@ -234,9 +234,9 @@ With `prefers-reduced-motion: reduce` and `respectReducedMotion: true` (default)
 
 Setting `respectReducedMotion: false` opts out.
 
-## 10. Non-goals for `0.1.0`
+## 10. Non-goals
 
-Not implemented, not planned for this version:
+Not implemented:
 
 - Smooth scrolling / scroll hijacking, in any form.
 - A Lenis adapter or any scroll-library compatibility layer.
@@ -249,8 +249,7 @@ Not implemented, not planned for this version:
 - CommonJS.
 - IE or pre-2020 browser support.
 
-## 11. Measured, not claimed
+## 11. Measurement
 
-Bundle size and frame cost are measured, not asserted, and the measurement
-scripts live in `measure/`. See `README.md` for the numbers from the last run and
-`DECISIONS.md` for how they were taken.
+Bundle size and frame cost come from scripts in `measure/`. See `README.md` for
+the numbers from the last run and `DECISIONS.md` for how they were taken.
