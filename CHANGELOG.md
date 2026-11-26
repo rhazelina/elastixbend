@@ -15,6 +15,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - GitHub Actions workflow running typecheck, unit tests, build, size budgets,
   and the three-browser e2e suite.
 
+### Fixed
+
+- E2E tests wait for the playground to signal readiness before sending input.
+  A cold WebKit page could otherwise receive its first wheel before the demo
+  installed its listeners, leaving the pull at zero.
+
 ### Documentation
 
 - Six how-to guides lead the site: edge pull, scroll lean, draggable card,

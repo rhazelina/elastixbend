@@ -1,7 +1,7 @@
 import { createBend } from "../../src/index";
 import type { BendInstance } from "../../src/types";
 import { mountControls, type ControlState } from "./controls";
-import { bare } from "./harness";
+import { bare, markReady } from "./harness";
 
 const params = new URLSearchParams(location.search);
 const off = params.has("off");
@@ -51,6 +51,7 @@ function mount(raw?: Record<string, number>): void {
 
 if (!off) {
   mount();
+  markReady();
 
   if (panel && !bare) {
     mountControls(

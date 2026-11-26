@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { open } from "./helpers";
 
 test.describe("scroll contract", () => {
   test("never cancels a scroll gesture", async ({ page }) => {
-    await page.goto("/edge.html");
+    await open(page, "/edge.html");
 
     // Any `preventDefault` on wheel/touch/pointer shows up here. A passive
     // listener cannot cancel, so this also proves the listeners are passive.
@@ -34,7 +35,7 @@ test.describe("scroll contract", () => {
   });
 
   test("drag never cancels the pointer gesture", async ({ page }) => {
-    await page.goto("/drag.html");
+    await open(page, "/drag.html");
 
     // `drag` is the one preset that follows a pointer. It is still not allowed
     // to cancel anything: capture keeps the gesture alive, cancellation would
@@ -69,7 +70,7 @@ test.describe("scroll contract", () => {
   });
 
   test("drag leaves the element's touch-action to the page", async ({ page }) => {
-    await page.goto("/drag.html");
+    await open(page, "/drag.html");
 
     // The library must not write inline `touch-action`; the page's stylesheet
     // owns that declaration.
@@ -80,7 +81,7 @@ test.describe("scroll contract", () => {
   });
 
   test("leaves scroll position under native control", async ({ page }) => {
-    await page.goto("/edge.html");
+    await open(page, "/edge.html");
 
     // Scrolling down from the top is the browser's job and must keep working.
     await page.mouse.move(400, 400);
@@ -90,7 +91,7 @@ test.describe("scroll contract", () => {
   });
 
   test("does not write scroll position while pulling", async ({ page }) => {
-    await page.goto("/edge.html");
+    await open(page, "/edge.html");
 
     await page.evaluate(() => {
       const scope = window as unknown as {

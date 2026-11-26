@@ -14,3 +14,13 @@ if (bare) document.body.classList.add("bare");
 (window as unknown as { __bendDebug?: unknown }).__bendDebug = {
   activeTaskCount,
 };
+
+/**
+ * Set only after `createBend` has returned. The HTML contains the readout
+ * before the module runs, so waiting for the element alone lets a fast test
+ * send its first gesture into a page that has no listeners yet. This is most
+ * visible on a cold WebKit page.
+ */
+export function markReady(): void {
+  document.body.dataset.bendReady = "1";
+}

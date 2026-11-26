@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { open } from "./helpers";
 
 const readPull = async (page: import("@playwright/test").Page): Promise<number> => {
   const text = await page.locator("#pull").innerText();
@@ -10,7 +11,7 @@ const readPhase = async (page: import("@playwright/test").Page): Promise<string>
 
 test.describe("edge preset", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/edge.html");
+    await open(page, "/edge.html");
     await page.waitForFunction(() => document.querySelector("#pull") !== null);
   });
 
@@ -58,7 +59,7 @@ test.describe("edge preset", () => {
 
 test.describe("edge preset on the x axis", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/edge-x.html");
+    await open(page, "/edge-x.html");
     await page.waitForFunction(() => document.querySelector("#pull") !== null);
   });
 
@@ -101,7 +102,7 @@ test.describe("edge preset on the x axis", () => {
 
 test.describe("drag preset", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/drag.html");
+    await open(page, "/drag.html");
     await page.waitForFunction(() => document.querySelector("#pull") !== null);
   });
 
@@ -143,7 +144,7 @@ test.describe("reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 
   test("stays inert", async ({ page }) => {
-    await page.goto("/edge.html");
+    await open(page, "/edge.html");
     await page.mouse.move(400, 400);
     await page.mouse.wheel(0, -600);
     await page.waitForTimeout(300);
@@ -155,7 +156,7 @@ test.describe("reduced motion", () => {
 
 test.describe("reactive reduced motion", () => {
   test("picks up a preference change without recreating the instance", async ({ page }) => {
-    await page.goto("/edge.html");
+    await open(page, "/edge.html");
     await page.emulateMedia({ reducedMotion: "reduce" });
 
     await page.mouse.move(400, 400);
@@ -175,7 +176,7 @@ test.describe("reactive reduced motion", () => {
 
 test.describe("surface preset", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/surface.html");
+    await open(page, "/surface.html");
     await page.waitForFunction(() => document.querySelector("#pull") !== null);
   });
 
@@ -197,7 +198,7 @@ test.describe("touch drag", () => {
 
   test("edge pulls with a finger drag", async ({ page, context, browserName }) => {
     test.skip(browserName !== "chromium", "uses CDP to dispatch touch points");
-    await page.goto("/edge.html");
+    await open(page, "/edge.html");
     const cdp = await context.newCDPSession(page);
 
     const drag = async (fromY: number, toY: number): Promise<void> => {
