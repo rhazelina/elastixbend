@@ -14,27 +14,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Firefox and WebKit Playwright projects, opt-in with `E2E_ALL_BROWSERS=1`.
 - GitHub Actions workflow running typecheck, unit tests, build, size budgets,
   and the three-browser e2e suite.
-- `preset: "drag"`: the element follows a pointer inside itself and springs
-  back on release. Needs `touch-action: none` on the target, declared by the
-  consumer; the library never sets it and never calls `preventDefault`.
-- `dragMaxRatio` (default `0.22`) caps a drag against the target's own size.
-- `axis: "x"` now works in every preset. Geometry, the edge clamp, and touch
-  input all follow the configured axis instead of reading the vertical document.
-- `resistance` accepts `{ wheel, touch }` so the two input classes can be tuned
-  apart. Defaults are `{ wheel: 5, touch: 3 }`.
-- `curve: "linear" | "ease"`, default `"linear"`. `ease` saturates toward the
-  pull limit after the resistance is applied.
-
-### Changed
-
-- **Breaking for direct callers:** `clampToEdge` takes `"start"` / `"end"`
-  instead of `"top"` / `"bottom"`, matching `edgeAt`.
-- Docs rewritten for a consistent voice; no runtime change.
-- **Feel change:** the default wheel resistance is 5, where `resistance` was
-  previously one number at 3. Same resistance on wheel now needs
-  `resistance: 3`.
-- `DEFAULT_RESISTANCE` is replaced by `DEFAULT_RESISTANCE_WHEEL` and
-  `DEFAULT_RESISTANCE_TOUCH`.
 
 ### Documentation
 
@@ -54,6 +33,41 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   three presets.
 - Internal Markdown links are checked in CI after the docs build. No runtime
   code changed in this pass.
+
+## [0.3.0] - 2026-11-26
+
+### Added
+
+- `preset: "drag"`: the element follows a pointer inside itself and springs
+  back on release. Needs `touch-action: none` on the target, declared by the
+  consumer; the library never sets it and never calls `preventDefault`.
+- `dragMaxRatio` (default `0.22`) caps a drag against the target's own size.
+
+## [0.2.0] - 2026-11-20
+
+### Added
+
+- `resistance` accepts `{ wheel, touch }` so the two input classes can be tuned
+  apart. Defaults are `{ wheel: 5, touch: 3 }`.
+- `curve: "linear" | "ease"`, default `"linear"`. `ease` saturates toward the
+  pull limit after the resistance is applied.
+- `axis: "x"` works in every preset. Geometry, the edge clamp, and touch input
+  all follow the configured axis instead of reading the vertical document.
+- A VitePress documentation site with local search, canonical URLs, and a
+  sitemap, deployed through Vercel.
+- Public exports added: `DEFAULT_RESISTANCE_TOUCH`, `DEFAULT_RESISTANCE_WHEEL`,
+  `resistEase`, `Curve`, `Resistance`, and `ResistanceConfig`.
+
+### Changed
+
+- **Breaking for direct callers:** `clampToEdge` takes `"start"` / `"end"`
+  instead of `"top"` / `"bottom"`, matching `edgeAt`.
+- `DEFAULT_RESISTANCE` is replaced by `DEFAULT_RESISTANCE_WHEEL` and
+  `DEFAULT_RESISTANCE_TOUCH`.
+- **Feel change:** the default wheel resistance is 5, where `resistance` was
+  previously one number at 3. Same resistance on wheel now needs
+  `resistance: 3`.
+- Docs rewritten for a consistent voice; no runtime change.
 
 ## [0.1.2] - 2026-11-20
 
@@ -119,7 +133,9 @@ First public release.
 - `axis: "x"` is wired but no preset listens to horizontal input yet.
 - No Lenis adapter. Scroll ownership stays with whoever owns it.
 
-[Unreleased]: https://github.com/rhazelina/elastixbend/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/rhazelina/elastixbend/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/rhazelina/elastixbend/releases/tag/v0.3.0
+[0.2.0]: https://github.com/rhazelina/elastixbend/releases/tag/v0.2.0
 [0.1.2]: https://github.com/rhazelina/elastixbend/releases/tag/v0.1.2
 [0.1.1]: https://github.com/rhazelina/elastixbend/releases/tag/v0.1.1
 [0.1.0]: https://github.com/rhazelina/elastixbend/releases/tag/v0.1.0
