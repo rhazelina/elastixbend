@@ -1,6 +1,6 @@
 {
   "name": "elastixbend",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "packageManager": "npm@12.2.1",
   "description": "Elastic scroll displacement that never hijacks scroll.",
   "license": "BSD-3-Clause",

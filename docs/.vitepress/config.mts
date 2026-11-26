@@ -84,6 +84,7 @@ export default defineConfig({
             { text: "How it works", link: "/guide/how-it-works" },
             { text: "Edge preset", link: "/guide/edge" },
             { text: "Surface preset", link: "/guide/surface" },
+            { text: "Drag preset", link: "/guide/drag" },
             { text: "Tuning", link: "/guide/tuning" },
             { text: "React", link: "/guide/react" },
           ],

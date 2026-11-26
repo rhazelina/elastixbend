@@ -1,4 +1,5 @@
 import {
+  DEFAULT_DRAG_MAX_RATIO,
   DEFAULT_LAG_FACTOR,
   DEFAULT_MAX_PX,
   DEFAULT_MAX_RATIO,
@@ -11,6 +12,7 @@ import type {
   Axis,
   BendOptions,
   Curve,
+  DragTarget,
   MaxPull,
   PresetName,
   RenderKind,
@@ -28,6 +30,8 @@ export interface ResolvedOptions {
   spring: Required<SpringConfig>;
   render: RenderKind;
   lagFactor: number;
+  drag: DragTarget;
+  dragMaxRatio: number;
   // `exactOptionalPropertyTypes` is off, so an explicit undefined here is fine.
   ignore: ((element: Element) => boolean) | undefined;
   releaseDelay: number;
@@ -64,6 +68,8 @@ export function resolveOptions(options: BendOptions = {}): ResolvedOptions {
     },
     render: options.render ?? "transform",
     lagFactor: options.lagFactor ?? DEFAULT_LAG_FACTOR,
+    drag: options.drag ?? "element",
+    dragMaxRatio: options.dragMaxRatio ?? DEFAULT_DRAG_MAX_RATIO,
     ignore: options.ignore,
     releaseDelay: options.releaseDelay ?? DEFAULT_RELEASE_DELAY,
     respectReducedMotion: options.respectReducedMotion ?? true,

@@ -258,3 +258,34 @@ this is a breaking rename for anyone calling it directly.
 The touch sign did not need to flip. On both axes the finger direction and the
 content direction agree: down and right pull the band positive, up and left pull
 it negative. Only the coordinate being read changes.
+
+## D16. `drag` gives the gesture to your CSS, not to the library
+
+`drag` is the first preset that has to hold a gesture, and holding a gesture is
+exactly what C1 forbids. There is no way around it on a touchscreen: either the
+library calls `preventDefault` on `touchmove`, or the element declares
+`touch-action: none`, or the browser scrolls the page and the drag never starts.
+
+The third option is not a design choice, it is a broken feature that works on
+desktop and fails on phones. So the choice is between C1 and C3, and both are
+listed as invariants.
+
+The way out is that neither has to be broken by the package. `touch-action` is a
+CSS declaration, and CSS belongs to the page. The consumer writes one line on
+one element; the library reads the computed value, never writes it, and never
+cancels anything. C1 stays intact. C3 stays intact, because the library still
+does not suppress native behaviour: the page does, on purpose, in an area it
+chooses.
+
+The cost is honest and local. While a finger is on the target, that element does
+not scroll the page. Everywhere else, nothing changed. A consumer who cannot
+afford that keeps using `edge` or `surface`, which need no CSS at all.
+
+`debug` has to carry the rest. A drag with `touch-action: auto` looks fine with
+a mouse, so the failure is invisible on the machine where it is being developed.
+Warning at creation turns a bug report from a phone into a console line on the
+desktop.
+
+Displacement follows the pointer 1:1, with no resistance. Resistance exists to
+make a wheel notch and a finger travel comparable. A pointer is already the
+thing itself, so dividing it would only put the band behind the finger.

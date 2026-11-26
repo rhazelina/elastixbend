@@ -2,7 +2,21 @@ export type Axis = "x" | "y";
 
 export type Phase = "idle" | "pulling" | "settling";
 
-export type PresetName = "edge" | "surface";
+/**
+ * `edge` pulls at document edges, `surface` leans behind scroll velocity, and
+ * `drag` follows a pointer inside the target.
+ *
+ * `drag` needs `touch-action: none` on the target, set by the consumer. The
+ * library never applies it (C3) and never cancels the pointer gesture (C1).
+ */
+export type PresetName = "edge" | "surface" | "drag";
+
+export type DragTarget = "element";
+
+export interface DragOptions {
+  /** Ceiling for a single drag, as a fraction of the target's own size. */
+  maxRatio?: number;
+}
 
 export type RenderKind = "transform" | "cssVar";
 
@@ -46,7 +60,7 @@ export interface MaxPull {
 }
 
 export interface BendOptions {
-  /** `edge` pulls at document edges, `surface` leans the content behind scroll velocity. */
+  /** `edge` pulls at document edges, `surface` leans behind velocity, `drag` follows a pointer. */
   preset?: PresetName;
   axis?: Axis;
   /**
@@ -62,6 +76,10 @@ export interface BendOptions {
   render?: RenderKind;
   /** `surface` only, in seconds: pull = -velocity * lagFactor. */
   lagFactor?: number;
+  /** `drag` only. Currently only `"element"`, which is also the default. */
+  drag?: DragTarget;
+  /** `drag` only: pull ceiling as a fraction of the target's height or width. */
+  dragMaxRatio?: number;
   /** Wheel and touch origins matching this are left alone. */
   ignore?: (element: Element) => boolean;
   /** `edge` only: how long after the last wheel event the pull is released, in ms. */

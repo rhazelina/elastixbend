@@ -5,6 +5,7 @@ export { pullLimit, resist, resistEase, clampToEdge } from "./kernels/resistance
 export { normalizeWheel, createVelocityTracker } from "./input";
 export { createGeometry, edgeAt } from "./geometry";
 export {
+  DEFAULT_DRAG_MAX_RATIO,
   DEFAULT_LAG_FACTOR,
   DEFAULT_MAX_PX,
   DEFAULT_MAX_RATIO,
@@ -19,6 +20,8 @@ export type {
   BendOptions,
   BendState,
   Curve,
+  DragOptions,
+  DragTarget,
   MaxPull,
   Phase,
   PresetName,

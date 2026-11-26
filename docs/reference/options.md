@@ -11,7 +11,7 @@ All options are optional. They are read **once** at creation; there is no
 
 | Option | Type | Default | Notes |
 |---|---|---|---|
-| `preset` | `"edge" \| "surface"` | `"edge"` | What drives the displacement |
+| `preset` | `"edge" \| "surface" \| "drag"` | `"edge"` | What drives the displacement |
 | `axis` | `"x" \| "y"` | `"y"` | Axis for geometry, input, and rendering |
 | `resistance` | `number \| { wheel?, touch? }` | `{ wheel: 5, touch: 3 }` | Divisor on cumulative gesture distance |
 | `curve` | `"linear" \| "ease"` | `"linear"` | Shape applied after resistance |
@@ -19,6 +19,8 @@ All options are optional. They are read **once** at creation; there is no
 | `spring` | `{ stiffness?, damping?, mass? }` | `{ stiffness: 200, damping: 25, mass: 1 }` | Integrator configuration |
 | `render` | `"transform" \| "cssVar"` | `"transform"` | How displacement reaches the DOM |
 | `lagFactor` | `number` | `0.04` | `surface` only; seconds of lag |
+| `drag` | `"element"` | `"element"` | `drag` only; what the pointer is bound to |
+| `dragMaxRatio` | `number` | `0.22` | `drag` only; ceiling as a fraction of the target's size |
 | `ignore` | `(element: Element) => boolean` | — | Leave matching gesture origins alone |
 | `releaseDelay` | `number` | `140` | `edge` only; ms of quiet before release |
 | `respectReducedMotion` | `boolean` | `true` | Make the effect inert under reduced motion |

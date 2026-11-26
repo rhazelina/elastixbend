@@ -6,6 +6,9 @@ export const DEFAULT_MAX_PX = 120;
 export const DEFAULT_MAX_RATIO = 0.18;
 export const DEFAULT_RELEASE_DELAY = 140;
 export const DEFAULT_LAG_FACTOR = 0.04;
+
+/** `drag` ceiling as a fraction of the target's own height or width. */
+export const DEFAULT_DRAG_MAX_RATIO = 0.22;
 export const DEFAULT_SPRING: Required<SpringConfig> = {
   stiffness: 200,
   damping: 25,

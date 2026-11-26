@@ -68,6 +68,23 @@ function frames(count = 1): void {
   for (let index = 0; index < count; index += 1) vi.advanceTimersByTime(16);
 }
 
+/**
+ * jsdom has no `PointerEvent`, and the preset only reads a handful of fields,
+ * so a plain event carrying them is enough.
+ */
+function pointer(
+  type: string,
+  point: { x?: number; y?: number; id?: number; pointerType?: string; button?: number } = {},
+): Event {
+  const event = new Event(type, { bubbles: true });
+  Object.defineProperty(event, "clientX", { value: point.x ?? 0 });
+  Object.defineProperty(event, "clientY", { value: point.y ?? 0 });
+  Object.defineProperty(event, "pointerId", { value: point.id ?? 1 });
+  Object.defineProperty(event, "pointerType", { value: point.pointerType ?? "mouse" });
+  Object.defineProperty(event, "button", { value: point.button ?? 0 });
+  return event;
+}
+
 let bend: BendInstance | null = null;
 
 function mount(options: Parameters<typeof createBend>[1] = {}): {
@@ -288,6 +305,86 @@ describe("edge preset", () => {
     scrollTo(400);
     frames(1);
     expect(mounted.bend.state.phase).not.toBe("pulling");
+  });
+});
+
+describe("drag preset", () => {
+  function mountDrag(): { element: HTMLDivElement; bend: BendInstance } {
+    const element = document.createElement("div");
+    Object.defineProperty(element, "clientHeight", { configurable: true, value: 400 });
+    Object.defineProperty(element, "clientWidth", { configurable: true, value: 400 });
+    document.body.appendChild(element);
+    bend = createBend(element, { preset: "drag", releaseDelay: 10_000 });
+    return { element, bend };
+  }
+
+  it("follows the pointer 1:1 while it is down", () => {
+    const mounted = mountDrag();
+    mounted.element.dispatchEvent(pointer("pointerdown", { y: 100 }));
+    mounted.element.dispatchEvent(pointer("pointermove", { y: 160 }));
+    frames(12);
+
+    // No resistance on a direct pointer, so 60 px of travel is 60 px of band.
+    expect(mounted.bend.state.pull).toBeCloseTo(60, 0);
+    expect(mounted.bend.state.phase).toBe("pulling");
+  });
+
+  it("caps the drag against the target's own size", () => {
+    const mounted = mountDrag();
+    mounted.element.dispatchEvent(pointer("pointerdown", { y: 0 }));
+    mounted.element.dispatchEvent(pointer("pointermove", { y: 400 }));
+    frames(20);
+
+    // 22% of a 400 px target.
+    expect(mounted.bend.state.pull).toBeLessThanOrEqual(88);
+    expect(mounted.bend.state.pull).toBeGreaterThan(80);
+  });
+
+  it("springs back to rest when the pointer lifts", () => {
+    const mounted = mountDrag();
+    mounted.element.dispatchEvent(pointer("pointerdown", { y: 100 }));
+    mounted.element.dispatchEvent(pointer("pointermove", { y: 150 }));
+    frames(10);
+    expect(mounted.bend.state.pull).toBeGreaterThan(10);
+
+    mounted.element.dispatchEvent(pointer("pointerup", {}));
+    frames(60);
+
+    expect(mounted.bend.state.pull).toBe(0);
+    expect(mounted.bend.state.phase).toBe("idle");
+    expect(mounted.element.style.transform).toBe("");
+  });
+
+  it("returns to rest when the browser cancels the pointer", () => {
+    const mounted = mountDrag();
+    mounted.element.dispatchEvent(pointer("pointerdown", { y: 100 }));
+    mounted.element.dispatchEvent(pointer("pointermove", { y: 150 }));
+    frames(10);
+
+    mounted.element.dispatchEvent(pointer("pointercancel", {}));
+    frames(60);
+    expect(mounted.bend.state.pull).toBe(0);
+  });
+
+  it("ignores a drag that starts on a button", () => {
+    const mounted = mountDrag();
+    const button = document.createElement("button");
+    mounted.element.appendChild(button);
+
+    button.dispatchEvent(pointer("pointerdown", { y: 100 }));
+    mounted.element.dispatchEvent(pointer("pointermove", { y: 200 }));
+    frames(10);
+
+    expect(mounted.bend.state.pull).toBe(0);
+  });
+
+  it("ignores a right click", () => {
+    const mounted = mountDrag();
+    mounted.element.dispatchEvent(pointer("pointerdown", { y: 100, button: 2 }));
+    mounted.element.dispatchEvent(pointer("pointermove", { y: 200 }));
+    frames(10);
+
+    expect(mounted.bend.state.pull).toBe(0);
   });
 });
 

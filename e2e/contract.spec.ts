@@ -33,6 +33,52 @@ test.describe("scroll contract", () => {
     expect(cancelled).toEqual([]);
   });
 
+  test("drag never cancels the pointer gesture", async ({ page }) => {
+    await page.goto("/drag.html");
+
+    // `drag` is the one preset that follows a pointer. It is still not allowed
+    // to cancel anything: capture keeps the gesture alive, cancellation would
+    // take it from the page.
+    await page.evaluate(() => {
+      const w = window as unknown as { __cancelled: string[] };
+      w.__cancelled = [];
+      for (const type of ["pointerdown", "pointermove", "pointerup", "touchstart", "touchmove"]) {
+        document.addEventListener(
+          type,
+          (event) => {
+            if (event.defaultPrevented) w.__cancelled.push(type);
+          },
+          { passive: true, capture: true },
+        );
+      }
+    });
+
+    const card = page.locator("#stage");
+    const box = await card.boundingBox();
+    if (!box) throw new Error("drag card has no box");
+
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 90, { steps: 8 });
+    await page.mouse.up();
+
+    const cancelled = await page.evaluate(
+      () => (window as unknown as { __cancelled: string[] }).__cancelled,
+    );
+    expect(cancelled).toEqual([]);
+  });
+
+  test("drag leaves the element's touch-action to the page", async ({ page }) => {
+    await page.goto("/drag.html");
+
+    // The library must not write inline `touch-action`; the page's stylesheet
+    // owns that declaration.
+    const inline = await page.evaluate(
+      () => document.querySelector<HTMLElement>("#stage")?.style.touchAction ?? "",
+    );
+    expect(inline).toBe("");
+  });
+
   test("leaves scroll position under native control", async ({ page }) => {
     await page.goto("/edge.html");
 

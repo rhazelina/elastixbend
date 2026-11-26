@@ -350,3 +350,37 @@ body.bare .controls-host {
 .axis-nav a:hover {
   text-decoration: underline;
 }
+
+/* ---------- drag demo ---------- */
+
+/* The one declaration the library will not make for you (C3). It is scoped to
+   the card, so the rest of the page keeps native scrolling. */
+.drag-card {
+  touch-action: none;
+  display: grid;
+  gap: 0.25rem;
+  place-content: center;
+  height: 14rem;
+  margin: 2rem 0;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--paper) 70%, #fff);
+  color: var(--muted);
+  text-align: center;
+  cursor: grab;
+  user-select: none;
+}
+
+.drag-card:active {
+  cursor: grabbing;
+}
+
+.drag-card strong {
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
+.drag-card span {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.76rem;
+}

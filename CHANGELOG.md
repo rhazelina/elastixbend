@@ -8,7 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- `axis: "x"` now works in both presets. Geometry, the edge clamp, and touch
+- `preset: "drag"`: the element follows a pointer inside itself and springs
+  back on release. Needs `touch-action: none` on the target, declared by the
+  consumer; the library never sets it and never calls `preventDefault`.
+- `dragMaxRatio` (default `0.22`) caps a drag against the target's own size.
+- `axis: "x"` now works in every preset. Geometry, the edge clamp, and touch
   input all follow the configured axis instead of reading the vertical document.
 - `resistance` accepts `{ wheel, touch }` so the two input classes can be tuned
   apart. Defaults are `{ wheel: 5, touch: 3 }`.

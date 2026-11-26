@@ -10,8 +10,8 @@
     <main class="hub">
       <h1>elastixbend</h1>
       <p class="lede">
-        Dua preset, satu inti. Keduanya tidak pernah menulis posisi scroll dan tidak
-        pernah memanggil <code>preventDefault</code> pada gestur scroll.
+        Tiga preset, satu inti. Tidak ada yang menulis posisi scroll, dan tidak ada
+        yang memanggil <code>preventDefault</code> pada gestur scroll.
       </p>
       <ul class="hub-list">
         <li>
@@ -26,15 +26,21 @@
           <a href="/surface.html">surface</a>
           <span>Konten tertinggal dari kecepatan scroll lalu menyusul.</span>
         </li>
+        <li>
+          <a href="/drag.html">drag</a>
+          <span>Elemen mengikuti pointer 1:1 lalu memantul. Butuh <code>touch-action: none</code> dari CSS halaman.</span>
+        </li>
       </ul>
 
-      <h2>Kenapa ada dua</h2>
+      <h2>Kenapa tiga</h2>
       <p class="lede">
-        Keduanya memakai pegas dan renderer yang sama. Bedanya hanya target:
+        Semuanya memakai pegas dan renderer yang sama. Bedanya hanya target:
         <code>edge</code> membaca gestur di tepi dokumen, <code>surface</code>
-        membaca kecepatan scroll. Sumbu dipilih lewat <code>axis: "x"</code>, dan
-        preset yang sama langsung bekerja horizontal. Tidak ada mode yang menahan gestur, jadi
-        trackpad, roda mouse, keyboard, dan scrollbar tetap berfungsi sama.
+        membaca kecepatan scroll, <code>drag</code> mengikuti pointer di dalam
+        elemennya sendiri. Sumbu dipilih lewat <code>axis: "x"</code>. Tidak ada
+        preset yang menulis posisi scroll. <code>drag</code> satu-satunya yang
+        menahan gestur, dan itu hanya bisa karena halaman menyerahkan area kecil
+        lewat <code>touch-action: none</code>.
       </p>
 
       <p class="lede note-path">

@@ -99,6 +99,46 @@ test.describe("edge preset on the x axis", () => {
   });
 });
 
+test.describe("drag preset", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/drag.html");
+    await page.waitForFunction(() => document.querySelector("#pull") !== null);
+  });
+
+  test("follows the pointer and springs back", async ({ page }) => {
+    const card = page.locator("#stage");
+    const box = await card.boundingBox();
+    if (!box) throw new Error("drag card has no box");
+
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(startX, startY + 60, { steps: 6 });
+
+    await expect.poll(() => readPull(page)).toBeGreaterThan(20);
+
+    await page.mouse.up();
+    await expect.poll(() => readPhase(page), { timeout: 3000 }).toBe("idle");
+    await expect.poll(() => readPull(page)).toBe(0);
+  });
+
+  test("does not scroll the page while dragging", async ({ page }) => {
+    const card = page.locator("#stage");
+    const box = await card.boundingBox();
+    if (!box) throw new Error("drag card has no box");
+
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 80, { steps: 6 });
+    await page.mouse.up();
+    await page.waitForTimeout(120);
+
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+});
+
 test.describe("reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 

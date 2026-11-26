@@ -2,6 +2,7 @@ import { createGeometry } from "./geometry";
 import { isSettled, stepSpring } from "./kernels/spring";
 import { clampToEdge, pullLimit as computePullLimit } from "./kernels/resistance";
 import { resolveOptions, type ResolvedOptions } from "./options";
+import { createDragPreset } from "./presets/drag";
 import { createEdgePreset } from "./presets/edge";
 import { createSurfacePreset } from "./presets/surface";
 import type { EdgeSide } from "./geometry";
@@ -49,6 +50,9 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
 
   if (resolved.render === "transform") {
     warnContractViolations(element, resolved);
+  }
+  if (resolved.preset === "drag") {
+    warnMissingTouchAction(element);
   }
 
   const renderer: Renderer =
@@ -136,8 +140,13 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
     },
   };
 
-  const preset: PresetModule =
-    resolved.preset === "surface" ? createSurfacePreset(host) : createEdgePreset(host);
+  const preset: PresetModule = createPreset(resolved.preset);
+
+  function createPreset(name: ResolvedOptions["preset"]): PresetModule {
+    if (name === "surface") return createSurfacePreset(host);
+    if (name === "drag") return createDragPreset(host, element);
+    return createEdgePreset(host);
+  }
 
   function tick(dt: number): boolean {
     if (destroyed || paused) return false;
@@ -226,6 +235,23 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/**
+ * `drag` follows a pointer, and on touch hardware the browser claims that
+ * gesture for scrolling unless the element says otherwise. The library may not
+ * set `touch-action` itself (C3), so the one thing it can do is say so loudly
+ * instead of leaving the consumer with an effect that works with a mouse and
+ * dies on a phone.
+ */
+function warnMissingTouchAction(element: HTMLElement): void {
+  const value = getComputedStyle(element).touchAction;
+  if (value === "none" || value === "pan-x" || value === "pan-y") return;
+  console.warn(
+    "[elastixbend] `preset: \"drag\"` needs `touch-action: none` on the target, set by your CSS. " +
+      "The library does not set it, because that would take the gesture away from the page. " +
+      `Current value: ${value}.`,
+  );
 }
 
 /**

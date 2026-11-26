@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { resolveOptions } from "../src/options";
 import {
+  DEFAULT_DRAG_MAX_RATIO,
   DEFAULT_LAG_FACTOR,
   DEFAULT_MAX_PX,
   DEFAULT_MAX_RATIO,
@@ -28,6 +29,8 @@ describe("resolveOptions", () => {
     });
     expect(resolved.render).toBe("transform");
     expect(resolved.lagFactor).toBe(DEFAULT_LAG_FACTOR);
+    expect(resolved.drag).toBe("element");
+    expect(resolved.dragMaxRatio).toBe(DEFAULT_DRAG_MAX_RATIO);
     expect(resolved.releaseDelay).toBe(DEFAULT_RELEASE_DELAY);
     expect(resolved.respectReducedMotion).toBe(true);
     expect(resolved.ignore).toBeUndefined();

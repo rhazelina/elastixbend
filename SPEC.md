@@ -1,6 +1,6 @@
 # elastixbend: specification
 
-Version: `0.2.0`. This document is the contract. Anything not written here is not
+Version: `0.3.0`. This document is the contract. Anything not written here is not
 promised, including internals, file layout, and the exact numbers behind the
 defaults.
 
@@ -54,7 +54,7 @@ The instance does not touch the DOM until the first gesture.
 
 ```ts
 interface BendOptions {
-  preset?: "edge" | "surface";        // default "edge"
+  preset?: "edge" | "surface" | "drag";  // default "edge"
   axis?: "x" | "y";                   // default "y", both presets
   resistance?: number | { wheel?: number; touch?: number };
                                       // default { wheel: 5, touch: 3 }
@@ -63,6 +63,8 @@ interface BendOptions {
   spring?: { stiffness?: number; damping?: number; mass?: number };
   render?: "transform" | "cssVar";    // default "transform"
   lagFactor?: number;                 // default 0.04, `surface` only
+  drag?: "element";                   // default "element", `drag` only
+  dragMaxRatio?: number;              // default 0.22, `drag` only
   ignore?: (element: Element) => boolean;
   releaseDelay?: number;              // default 140 ms, `edge` only
   respectReducedMotion?: boolean;     // default true
@@ -178,6 +180,24 @@ Displacement driven by scroll velocity, independent of input method.
 - Works for wheel, touch, keyboard, scrollbar, and programmatic scroll alike,
   because it reads position, not events.
 
+### 5.3 `drag`
+
+Displacement driven by a pointer inside the target itself.
+
+- Follows the pointer 1:1 on the configured axis. Resistance does not apply,
+  because a pointer needs no cross-device normalisation.
+- Clamped to `min(max, dragMaxRatio × target size along the axis)`.
+- `pointerdown` starts a gesture on the primary pointer only. A right-click, or
+  a pointer that starts inside `a`, `button`, `input`, `select`, `textarea`,
+  `label`, or `contenteditable`, does not start one.
+- The pointer is captured for the duration so the gesture survives leaving the
+  element. Capture is not cancellation.
+- `pointerup` and `pointercancel` both release into the spring with the band's
+  own velocity.
+- Requires `touch-action: none` on the target, declared by the consumer. The
+  library never writes it (C3) and never calls `preventDefault` (C1). With
+  `debug`, a missing declaration is reported at creation.
+
 ## 6. Renderers
 
 ### 6.1 `transform` (default)
@@ -254,7 +274,6 @@ Not implemented:
 
 - Smooth scrolling / scroll hijacking, in any form.
 - A Lenis adapter or any scroll-library compatibility layer.
-- `drag` preset (rubber-band on pointer drag). `surface` ships `lean` only.
 - Custom presets from outside the package.
 - SSE/SSR rendering of the effect. Importing is SSR-safe; the effect does nothing
   until `createBend` is called in a browser.

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>elastixbend · drag</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <strong>drag</strong>
+      <span>tarik elemennya, bukan halamannya</span>
+      <span class="grow"></span>
+      <a href="/">semua preset</a>
+    </header>
+
+    <main class="page">
+      <h1>Tarik kartu di bawah</h1>
+      <p>
+        Elemen mengikuti pointer 1:1, lalu memantul balik saat dilepas. Mouse,
+        jari, dan pen lewat jalur yang sama.
+      </p>
+      <p class="note">
+        Halaman ini memberi <code>touch-action: none</code> pada kartu. Itu
+        keputusan CSS halaman, bukan library: library tidak pernah menulis
+        <code>touch-action</code> dan tidak pernah memanggil
+        <code>preventDefault</code>.
+      </p>
+
+      <div class="drag-card" id="stage" tabindex="0">
+        <strong>tarik saya</strong>
+        <span>ke atas atau ke bawah</span>
+      </div>
+
+      <p class="note">
+        Konsekuensinya jujur: selama jari berada di kartu, halaman tidak ikut
+        tergulir. Di luar kartu, scroll tetap native sepenuhnya.
+      </p>
+    </main>
+
+    <dl class="readout" aria-live="off" id="readout">
+      <dt>pull</dt>
+      <dd><b id="pull">0.00</b> px</dd>
+      <dt>phase</dt>
+      <dd><b id="phase">idle</b></dd>
+    </dl>
+
+    <section class="controls-host" id="controls" aria-label="Parameter"></section>
+
+    <script type="module" src="/demo/drag.ts"></script>
+  </body>
+</html>

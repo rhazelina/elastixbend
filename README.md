@@ -57,9 +57,32 @@ createBend(el, { preset: "surface", lagFactor: 0.04 });
 Works for wheel, touch, keyboard, scrollbar, and programmatic scroll, because it
 reads scroll position rather than input events.
 
+### `preset: "drag"`
+
+The element follows a pointer inside itself and springs back on release:
+
+```ts
+createBend(el, { preset: "drag" });
+```
+
+```css
+.card {
+  touch-action: none;
+}
+```
+
+The CSS line is yours to write, and it is the only one this preset asks for. Without
+it the browser takes the touch gesture for scrolling, `pointermove` stops arriving,
+and the drag dies quietly on a phone while still working with a mouse. `debug`
+reports the missing declaration at creation.
+
+The library never sets `touch-action` and never calls `preventDefault`, so the
+gesture is given up by your CSS on one small area, not by the package on the
+whole page. Outside that element the page scrolls exactly as before.
+
 ### `axis: "x"`
 
-Both presets follow the axis, geometry included:
+All three presets follow the axis, geometry included:
 
 ```ts
 createBend(el, { preset: "edge", axis: "x" });
@@ -151,7 +174,10 @@ Read these before shipping.
 7. **Only wheel and touch drive `edge`.** Keyboard scrolling and scrollbar drags
    release the band rather than driving it. That's intended: they aren't gestures
    you can rubber-band.
-8. **No custom presets.** The host interface is typed but not exported.
+8. **`drag` needs `touch-action: none` from your CSS.** It is the only preset
+   that claims a gesture, and it can only do that because your stylesheet gives
+   up scrolling on that one element. Nothing sets it for you.
+9. **No custom presets.** The host interface is typed but not exported.
 
 ---
 
@@ -164,13 +190,13 @@ Reproduce with `npm run size` and `npm run measure`.
 
 | Entry | Brotli + deps (size-limit) | Minified + gzip | Budget |
 |---|---|---|---|
-| `elastixbend` (core) | **3.41 kB** | 3.96 kB | 5 kB |
+| `elastixbend` (core) | **3.91 kB** | 4.59 kB | 5 kB |
 | `elastixbend/react` (binding only) | not applicable | **0.54 kB** | 1.5 kB |
-| `elastixbend/react` (binding + core) | **3.83 kB** | 4.16 kB | 5 kB |
+| `elastixbend/react` (binding + core) | **4.35 kB** | 4.78 kB | 5 kB |
 
 The React binding is reported two ways on purpose: on its own (0.54 kB, what it
 adds to a page that already imported the core) and bundled with the core
-(3.83 kB, what a React-only consumer actually ships). `size-limit` cannot express
+(4.35 kB, what a React-only consumer actually ships). `size-limit` cannot express
 the first case because the built entry shares a chunk with the core, so it is
 measured by `npm run size:react` with the chunk marked external. `size-limit`'s
 figure is brotli; the gzip column is `esbuild --bundle --minify` plus `gzip -9`.
@@ -182,7 +208,7 @@ with the library not instantiated (`?off=1`).
 
 | Page | p50 frame | p95 frame | frames > 32 ms | layout | style recalc | script | loop settles |
 |---|---|---|---|---|---|---|---|
-| `edge` | 16.7 ms | 16.8 ms | 0 | 1 | 26 | 8 ms | 478 ms |
+| `edge` | 16.7 ms | 16.8 ms | 0 | 1 | 25 | 9 ms | 505 ms |
 | `surface` | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 1 ms | 0 ms |
 | baseline | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 1 ms | n/a |
 
@@ -218,7 +244,7 @@ Full contract in [`SPEC.md`](./SPEC.md). Rationale in
 
 ```ts
 createBend(element, {
-  preset: "edge" | "surface",
+  preset: "edge" | "surface" | "drag",
   axis: "x" | "y",
   resistance: number | { wheel: number, touch: number },
   curve: "linear" | "ease",
@@ -226,6 +252,8 @@ createBend(element, {
   spring: { stiffness: number, damping: number, mass: number },
   render: "transform" | "cssVar",
   lagFactor: number,
+  drag: "element",
+  dragMaxRatio: number,
   ignore: (element: Element) => boolean,
   releaseDelay: number,
   respectReducedMotion: boolean,
