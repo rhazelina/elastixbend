@@ -8,6 +8,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Reactive `prefers-reduced-motion`: toggling the preference starts or tears
+  down the effect on the existing instance. Subscriptions and `pause()` survive
+  the switch; the target's styles are restored when going inert.
+- Firefox and WebKit Playwright projects, opt-in with `E2E_ALL_BROWSERS=1`.
+- GitHub Actions workflow running typecheck, unit tests, build, size budgets,
+  and the three-browser e2e suite.
 - `preset: "drag"`: the element follows a pointer inside itself and springs
   back on release. Needs `touch-action: none` on the target, declared by the
   consumer; the library never sets it and never calls `preventDefault`.

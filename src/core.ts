@@ -18,40 +18,103 @@ type Mode = "idle" | "pull" | "spring";
 /** The public snapshot is typed readonly; the engine needs to write it. */
 type MutableState = { -readonly [K in keyof BendState]: BendState[K] };
 
+type Listener = (state: BendState) => void;
+
+/** The parts of an active engine the public instance delegates to. */
+interface Engine {
+  settle(): void;
+  pause(): void;
+  resume(): void;
+  destroy(): void;
+}
+
+/**
+ * `createBend` keeps one shape for the whole life of the instance, even when
+ * the media query flips. Subscribers and the snapshot object belong to the
+ * public instance, so they survive an engine swap; only the engine's listeners,
+ * scheduler task, preset, geometry, and renderer come and go.
+ */
 export function createBend(element: HTMLElement, options: BendOptions = {}): BendInstance {
   const resolved = resolveOptions(options);
   const state: MutableState = { pull: 0, velocity: 0, phase: "idle" };
+  const listeners = new Set<Listener>();
 
-  const listeners = new Set<(state: BendState) => void>();
   let destroyed = false;
   let paused = false;
+  let engine: Engine | null = null;
 
-  const reduced = resolved.respectReducedMotion && prefersReducedMotion();
+  const query = resolved.respectReducedMotion ? reducedMotionQuery() : null;
 
-  if (reduced) {
-    // Inert, but the same shape, so consumer code does not need to branch.
-    return {
-      state,
-      subscribe(listener) {
-        listeners.add(listener);
-        return () => listeners.delete(listener);
-      },
-      settle() {},
-      pause() {},
-      resume() {},
-      destroy() {
-        listeners.clear();
-      },
-    };
+  const notify = (): void => {
+    for (const listener of listeners) listener(state);
+  };
+
+  function sync(): void {
+    if (destroyed) return;
+
+    const inert = query !== null && query.matches;
+    if (inert && engine) {
+      // Tearing down the engine restores the target's styles and clears the
+      // scheduler. It does not clear `listeners`, which belong to the caller.
+      engine.destroy();
+      engine = null;
+      notify();
+      return;
+    }
+
+    if (!inert && !engine) {
+      engine = createEngine(element, resolved, state, listeners, () => paused);
+      return;
+    }
   }
 
+  const onPreferenceChange = (): void => sync();
+  query?.addEventListener?.("change", onPreferenceChange);
+  sync();
+
+  return {
+    state,
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    settle() {
+      engine?.settle();
+    },
+    pause() {
+      paused = true;
+      engine?.pause();
+    },
+    resume() {
+      paused = false;
+      engine?.resume();
+    },
+    destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      query?.removeEventListener?.("change", onPreferenceChange);
+      engine?.destroy();
+      engine = null;
+      listeners.clear();
+    },
+  };
+}
+
+/** Builds the running effect. Nothing here knows about reduced motion. */
+function createEngine(
+  element: HTMLElement,
+  resolved: ResolvedOptions,
+  state: MutableState,
+  listeners: Set<Listener>,
+  isPaused: () => boolean,
+): Engine {
   const axis = resolved.axis;
   const geometry = createGeometry(axis);
 
   if (resolved.render === "transform") {
     warnContractViolations(element, resolved);
   }
-  if (resolved.preset === "drag") {
+  if (resolved.preset === "drag" && resolved.debug) {
     warnMissingTouchAction(element);
   }
 
@@ -60,6 +123,7 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
       ? createTransformRenderer(element, axis)
       : createCssVarRenderer(element);
 
+  let destroyed = false;
   let mode: Mode = "idle";
   let springTarget = 0;
   let pull = 0;
@@ -130,7 +194,7 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
       schedule(tick);
     },
     isBlocked(origin: EventTarget | null) {
-      if (paused) return true;
+      if (isPaused()) return true;
       if (isScrollLocked()) return true;
       if (origin instanceof Element && resolved.ignore?.(origin) === true) return true;
       return false;
@@ -149,7 +213,7 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
   }
 
   function tick(dt: number): boolean {
-    if (destroyed || paused) return false;
+    if (destroyed || isPaused()) return false;
 
     // The preset drives the machine: it may call `setPull` (mode "pull") or
     // `release`/`springTo` (mode "spring") from inside this frame.
@@ -193,24 +257,16 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
     return true;
   }
 
-  const instance: BendInstance = {
-    state,
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
+  return {
     settle() {
       if (mode === "idle") return;
       host.release(velocity);
     },
     pause() {
-      paused = true;
       unschedule(tick);
       host.snapToRest();
     },
-    resume() {
-      paused = false;
-    },
+    resume() {},
     destroy() {
       if (destroyed) return;
       destroyed = true;
@@ -218,7 +274,6 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
       preset.destroy();
       geometry.destroy();
       renderer.destroy();
-      listeners.clear();
       pull = 0;
       velocity = 0;
       mode = "idle";
@@ -228,13 +283,11 @@ export function createBend(element: HTMLElement, options: BendOptions = {}): Ben
       state.phase = "idle";
     },
   };
-
-  return instance;
 }
 
-function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function reducedMotionQuery(): MediaQueryList | null {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return null;
+  return window.matchMedia("(prefers-reduced-motion: reduce)");
 }
 
 /**

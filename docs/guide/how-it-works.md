@@ -60,12 +60,13 @@ The loop is scheduled on demand and unscheduled the frame it goes idle (C7).
 ## Reduced motion
 
 With `prefers-reduced-motion: reduce` and `respectReducedMotion: true` (the
-default), `createBend` returns an inert instance with the same shape: state
-stays `idle`, `subscribe` never fires, no listener is installed, and the DOM is
-not touched.
+default), the instance is inert with the same shape: state stays `idle`, no
+listener is installed, and the DOM is not touched.
 
 A slower spring would still be motion, so the effect is disabled rather than
-damped.
+damped. The preference is watched, so toggling it in your OS takes effect right
+away. The instance swaps its internals while keeping your subscriptions and its
+paused state.
 
 ## What it deliberately does not do
 

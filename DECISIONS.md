@@ -289,3 +289,26 @@ desktop.
 Displacement follows the pointer 1:1, with no resistance. Resistance exists to
 make a wheel notch and a finger travel comparable. A pointer is already the
 thing itself, so dividing it would only put the band behind the finger.
+
+## D17. The media query is watched, not sampled once
+
+The first implementation read `matchMedia(...).matches` at creation and returned
+an inert instance for the life of the page. A user who turns on Reduce while the
+tab is open keeps the effect until they reload, which is the one case where an
+accessibility preference is most likely to be set: someone reached for it
+because the motion on this page bothered them.
+
+The instance could not simply be recreated, because consumers hold on to it,
+subscribe to it, and may have paused it. So the running effect moved behind the
+public object. The snapshot and the subscriber set stay put; the preset,
+geometry, renderer, scheduler task, and event listeners come and go together.
+A preference change swaps that whole unit.
+
+Three details make the swap safe. Going inert tears down the renderer, which
+restores `transform` and `will-change` before the effect stops. The state is
+reset to idle and subscribers are notified once, so a consumer reading the last
+snapshot never sees a stale pull. The paused flag lives on the public object, so
+pause survives both directions instead of silently resuming.
+
+Opting out with `respectReducedMotion: false` installs no query listener at all.
+That is cheaper than a listener that always answers the same way.

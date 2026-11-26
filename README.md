@@ -148,8 +148,13 @@ library exists to avoid.
 `prefers-reduced-motion: reduce` makes the effect inert. It installs no listeners
 and nothing animates; state stays idle. A slower spring would still be motion.
 
+The preference is watched, so changing it in the OS or browser takes effect on
+the existing instance. Subscribers and `pause()` survive both directions. Going
+inert tears down the preset, geometry, renderer, and frame loop, then restores
+the target's styles.
+
 ```ts
-createBend(el, { respectReducedMotion: false }); // opt out
+createBend(el, { respectReducedMotion: false }); // opt out of the media query
 ```
 
 ---
@@ -190,13 +195,13 @@ Reproduce with `npm run size` and `npm run measure`.
 
 | Entry | Brotli + deps (size-limit) | Minified + gzip | Budget |
 |---|---|---|---|
-| `elastixbend` (core) | **3.91 kB** | 4.59 kB | 5 kB |
+| `elastixbend` (core) | **4.02 kB** | 4.73 kB | 5 kB |
 | `elastixbend/react` (binding only) | not applicable | **0.54 kB** | 1.5 kB |
-| `elastixbend/react` (binding + core) | **4.35 kB** | 4.78 kB | 5 kB |
+| `elastixbend/react` (binding + core) | **4.47 kB** | 4.91 kB | 5 kB |
 
 The React binding is reported two ways on purpose: on its own (0.54 kB, what it
 adds to a page that already imported the core) and bundled with the core
-(4.35 kB, what a React-only consumer actually ships). `size-limit` cannot express
+(4.47 kB, what a React-only consumer actually ships). `size-limit` cannot express
 the first case because the built entry shares a chunk with the core, so it is
 measured by `npm run size:react` with the chunk marked external. `size-limit`'s
 figure is brotli; the gzip column is `esbuild --bundle --minify` plus `gzip -9`.
@@ -208,7 +213,7 @@ with the library not instantiated (`?off=1`).
 
 | Page | p50 frame | p95 frame | frames > 32 ms | layout | style recalc | script | loop settles |
 |---|---|---|---|---|---|---|---|
-| `edge` | 16.7 ms | 16.8 ms | 0 | 1 | 25 | 9 ms | 505 ms |
+| `edge` | 16.7 ms | 16.7 ms | 0 | 1 | 25 | 6 ms | 529 ms |
 | `surface` | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 1 ms | 0 ms |
 | baseline | 16.7 ms | 16.8 ms | 0 | 0 | 0 | 1 ms | n/a |
 
@@ -293,7 +298,7 @@ npm install
 npm run dev        # playground at :5173 (index / edge / surface)
 npm run typecheck
 npm run test       # unit tests, jsdom
-npm run test:e2e   # Playwright, needs `npx playwright install chromium`
+npm run test:e2e   # Playwright; E2E_ALL_BROWSERS=1 adds Firefox and WebKit
 npm run build      # tsup → dist/ (ESM + .d.ts)
 npm run size       # size-limit gate
 npm run size:react # react binding alone vs with core, gzip
@@ -303,6 +308,11 @@ npm run docs:dev   # documentation site (VitePress)
 npm run docs:build # static docs in docs/.vitepress/dist
 npm run verify     # typecheck + test + build + size + size:react
 ```
+
+Chromium runs out of the box. Firefox and WebKit need Playwright's system
+libraries (`npx playwright install --with-deps`), which is what CI installs.
+Without them, WebKit cannot launch at all, so it is opt-in locally rather than a
+silent skip.
 
 Playground pages take query flags used by the measurement scripts:
 

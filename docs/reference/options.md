@@ -96,9 +96,13 @@ back. Touch releases on `touchend` regardless.
 
 ## `respectReducedMotion`
 
-When `true` and the user prefers reduced motion, `createBend` returns an inert
-instance: state stays `idle`, `subscribe` never fires, no listener is installed,
-and the DOM is untouched.
+When `true` and the user prefers reduced motion, the instance is inert: state
+stays `idle`, no listener is installed, and the DOM is untouched. The preference
+is watched, so changing it takes effect on the same instance without a remount.
+Going inert tears down the effect and restores the target's styles; subscribers
+and the paused flag survive the switch.
+
+When `false`, no media query listener is installed at all.
 
 ## `debug`
 

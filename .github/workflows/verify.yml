@@ -1,0 +1,35 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # WebKit and Firefox need system libraries that are absent on a plain
+      # runner. The flag turns on all three projects in playwright.config.ts.
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:e2e -- --project=chromium --project=firefox --project=webkit
+        env:
+          E2E_ALL_BROWSERS: "1"

@@ -1,6 +1,6 @@
 # elastixbend: specification
 
-Version: `0.3.0`. This document is the contract. Anything not written here is not
+Version: `0.4.0`. This document is the contract. Anything not written here is not
 promised, including internals, file layout, and the exact numbers behind the
 defaults.
 
@@ -263,10 +263,17 @@ The loop is scheduled on demand and unscheduled the frame it goes idle (C7).
 ## 9. Reduced motion
 
 With `prefers-reduced-motion: reduce` and `respectReducedMotion: true` (default),
-`createBend` returns an inert instance with the same shape: state stays idle,
-`subscribe` never fires, and no listener is installed. The DOM is not touched.
+the instance is inert: state stays idle, no listener is installed, and the DOM is
+not touched. The public shape is the same in both modes.
 
-Setting `respectReducedMotion: false` opts out.
+The media query is watched for the lifetime of the instance. Switching from
+`reduce` to `no-preference` installs the preset, geometry, renderer, and frame
+loop; switching back tears them down, restores the target's styles, resets the
+state to idle, and notifies subscribers once. The `subscribe` set and the paused
+flag belong to the instance and survive either switch.
+
+Setting `respectReducedMotion: false` opts out: no media query listener is
+installed and the effect runs regardless of the preference.
 
 ## 10. Non-goals
 

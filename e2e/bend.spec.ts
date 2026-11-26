@@ -153,6 +153,26 @@ test.describe("reduced motion", () => {
   });
 });
 
+test.describe("reactive reduced motion", () => {
+  test("picks up a preference change without recreating the instance", async ({ page }) => {
+    await page.goto("/edge.html");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+
+    await page.mouse.move(400, 400);
+    await page.mouse.wheel(0, -600);
+    await page.waitForTimeout(200);
+    expect(await readPull(page)).toBe(0);
+
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.mouse.wheel(0, -600);
+    await expect.poll(() => readPull(page)).toBeGreaterThan(4);
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect.poll(() => readPull(page)).toBe(0);
+    await expect.poll(() => readPhase(page)).toBe("idle");
+  });
+});
+
 test.describe("surface preset", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/surface.html");
@@ -175,7 +195,8 @@ test.describe("surface preset", () => {
 test.describe("touch drag", () => {
   test.use({ hasTouch: true, viewport: { width: 390, height: 780 } });
 
-  test("edge pulls with a finger drag", async ({ page, context }) => {
+  test("edge pulls with a finger drag", async ({ page, context, browserName }) => {
+    test.skip(browserName !== "chromium", "uses CDP to dispatch touch points");
     await page.goto("/edge.html");
     const cdp = await context.newCDPSession(page);
 

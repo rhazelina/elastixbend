@@ -388,6 +388,126 @@ describe("drag preset", () => {
   });
 });
 
+describe("reactive reduced motion", () => {
+  const settle = { preset: "edge" as const, releaseDelay: 10_000 };
+  const ARRIVE = 40;
+  const originalMatchMedia = window.matchMedia;
+
+  interface FakeQuery {
+    matches: boolean;
+    change(next: boolean): void;
+    listeners: number;
+  }
+
+  function installQuery(initial: boolean): FakeQuery {
+    let matches = initial;
+    const callbacks = new Set<() => void>();
+    const query = {
+      get matches() {
+        return matches;
+      },
+      addEventListener(_type: string, callback: () => void) {
+        callbacks.add(callback);
+      },
+      removeEventListener(_type: string, callback: () => void) {
+        callbacks.delete(callback);
+      },
+      change(next: boolean) {
+        matches = next;
+        for (const callback of [...callbacks]) callback();
+      },
+      get listeners() {
+        return callbacks.size;
+      },
+    };
+
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: () => query as unknown as MediaQueryList,
+    });
+    return query;
+  }
+
+  afterEach(() => {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: originalMatchMedia,
+    });
+  });
+
+  it("switches between inert and active without changing the instance", () => {
+    const query = installQuery(true);
+    const mounted = mount({ ...settle });
+    const seen: number[] = [];
+    mounted.bend.subscribe((state) => seen.push(state.pull));
+
+    wheel(-240);
+    frames(ARRIVE);
+    expect(mounted.bend.state.pull).toBe(0);
+    expect(mounted.element.style.transform).toBe("");
+
+    query.change(false);
+    wheel(-240);
+    frames(ARRIVE);
+    expect(mounted.bend.state.pull).toBeCloseTo(48, 1);
+
+    query.change(true);
+    expect(mounted.bend.state.pull).toBe(0);
+    expect(mounted.bend.state.phase).toBe("idle");
+    expect(mounted.element.style.transform).toBe("");
+    expect(seen.at(-1)).toBe(0);
+
+    query.change(false);
+    wheel(-240);
+    frames(ARRIVE);
+    expect(mounted.bend.state.pull).toBeCloseTo(48, 1);
+    expect(query.listeners).toBe(1);
+  });
+
+  it("does not watch the query when respectReducedMotion is false", () => {
+    const query = installQuery(true);
+    const mounted = mount({ ...settle, respectReducedMotion: false });
+
+    wheel(-240);
+    frames(ARRIVE);
+    expect(mounted.bend.state.pull).toBeCloseTo(48, 1);
+    expect(query.listeners).toBe(0);
+  });
+
+  it("keeps subscribers and paused state across a swap", () => {
+    const query = installQuery(false);
+    const mounted = mount({ ...settle });
+    let calls = 0;
+    mounted.bend.subscribe(() => {
+      calls += 1;
+    });
+
+    mounted.bend.pause();
+    query.change(true);
+    query.change(false);
+    wheel(-240);
+    frames(ARRIVE);
+
+    // Still paused, so the gesture is left alone after the engine comes back.
+    expect(mounted.bend.state.pull).toBe(0);
+    expect(calls).toBeGreaterThan(0);
+
+    mounted.bend.resume();
+    wheel(-240);
+    frames(ARRIVE);
+    expect(mounted.bend.state.pull).toBeCloseTo(48, 1);
+  });
+
+  it("removes the media listener on destroy", () => {
+    const query = installQuery(false);
+    const mounted = mount({ ...settle });
+    mounted.bend.destroy();
+    expect(query.listeners).toBe(0);
+  });
+});
+
 describe("instance lifecycle", () => {
   it("notifies subscribers with a stable snapshot object", () => {
     const { bend: instance } = mount({ preset: "edge", releaseDelay: 10_000 });

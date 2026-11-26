@@ -70,9 +70,12 @@ The loop is scheduled on demand and unscheduled the frame it goes idle.
 ## Reduced motion
 
 With `prefers-reduced-motion: reduce` and `respectReducedMotion: true`, the
-returned instance is inert: state stays `idle`, `subscribe` never fires, no
-listener is installed, and the DOM is untouched. The shape of the instance is
-unchanged, so calling code does not need a branch.
+instance is inert: state stays `idle`, no listener is installed, and the DOM is
+untouched. The shape is unchanged, so calling code does not need a branch.
+
+The preference is reactive. When it changes, the instance tears down or starts
+the effect on its own. Existing subscriptions and the paused flag survive, so a
+React binding does not need to remount when the user changes an OS setting.
 
 ## Re-exports
 
