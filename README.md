@@ -195,7 +195,7 @@ Reproduce with `npm run size` and `npm run measure`.
 
 | Entry | Brotli + deps (size-limit) | Minified + gzip | Budget |
 |---|---|---|---|
-| `elastixbend` (core) | **4.02 kB** | 4.73 kB | 5 kB |
+| `elastixbend` (core) | **4.04 kB** | 4.73 kB | 5 kB |
 | `elastixbend/react` (binding only) | not applicable | **0.54 kB** | 1.5 kB |
 | `elastixbend/react` (binding + core) | **4.47 kB** | 4.91 kB | 5 kB |
 

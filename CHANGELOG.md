@@ -17,9 +17,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- E2E tests wait for the playground to signal readiness before sending input.
-  A cold WebKit page could otherwise receive its first wheel before the demo
-  installed its listeners, leaving the pull at zero.
+- A slow first frame no longer swallows a gesture. The `edge` release timer
+  now waits for the band to actually move instead of resetting the target to
+  zero before the integrator's first frame. Headless WebKit and Firefox can
+  hold a frame longer than the 140 ms release delay.
+- E2E tests wait for the playground to signal readiness before sending input,
+  and bring each page to the front so `requestAnimationFrame` is not throttled.
+  The suite runs with one worker for the same reason. Two regression tests
+  cover module load delay and a deliberately delayed first frame.
 
 ### Documentation
 

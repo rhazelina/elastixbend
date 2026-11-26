@@ -7,6 +7,9 @@ const allBrowsers = process.env.E2E_ALL_BROWSERS === "1";
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
+  // Headless WebKit and Firefox throttle requestAnimationFrame on pages that
+  // are not frontmost. One worker keeps the frame clock stable across projects.
+  workers: 1,
   reporter: [["list"]],
   use: {
     baseURL: "http://127.0.0.1:4173",

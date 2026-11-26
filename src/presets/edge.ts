@@ -73,7 +73,16 @@ export function createEdgePreset(host: PresetHost): PresetModule {
     cancelTimer();
     timer = setTimeout(() => {
       timer = null;
-      if (active) release();
+      if (!active) return;
+
+      // A backgrounded tab or a cold compositor can hold the first frame
+      // longer than `releaseDelay`. Releasing now would reset the target to
+      // zero before the band ever moved. Wait for the next quiet period.
+      if (host.pull === 0 && target() !== 0) {
+        scheduleRelease();
+        return;
+      }
+      release();
     }, releaseDelay);
   }
 
