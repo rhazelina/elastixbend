@@ -1,4 +1,5 @@
 ---
+pageClass: how-to
 description: Make content trail behind scroll velocity and catch up, regardless of input method.
 ---
 

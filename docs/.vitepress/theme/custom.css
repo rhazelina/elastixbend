@@ -26,12 +26,8 @@
     sans-serif;
   --vp-font-family-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
 
-  --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: linear-gradient(
-    120deg,
-    #9a3412 25%,
-    #d97706 100%
-  );
+  /* The name is content, not brand paint. Accent stays for actions and state. */
+  --vp-home-hero-name-color: var(--vp-c-text-1);
 }
 
 .dark {
@@ -53,15 +49,18 @@
   --vp-c-gutter: #22232b;
   --vp-c-border: #2e303a;
 
-  --vp-home-hero-name-background: linear-gradient(
-    120deg,
-    #f0a07a 25%,
-    #fbbf24 100%
-  );
 }
 
 .VPHero .name {
   letter-spacing: -0.03em;
+}
+
+/* 44 pt is the touch target floor. Same size for both actions; style, not
+   size, distinguishes the primary one. See buttons.md > Best practices. */
+.VPHero .action {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .VPHero .text {
@@ -138,22 +137,60 @@
 /* ---------- hero proof ---------- */
 
 .hero-proof {
-  max-width: 44rem;
-  margin: var(--eb-space-8) auto var(--eb-space-8);
-  text-align: center;
+  max-width: 46rem;
+  margin: var(--eb-space-8) auto var(--eb-space-4);
 }
 
-.proof-trace {
+.proof-instrument {
+  padding: var(--eb-space-5, 20px) var(--eb-space-6);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: var(--eb-radius);
+  background: var(--vp-c-bg-alt);
+}
+
+.proof-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--eb-space-4);
+  margin-bottom: var(--eb-space-6);
+}
+
+.proof-name {
+  color: var(--vp-c-text-2);
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.proof-readout {
+  color: var(--vp-c-text-1);
+  font-family: var(--vp-font-family-mono);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.proof-phase {
+  margin-left: var(--eb-space-2);
+  color: var(--vp-c-text-3);
+  font-size: 0.74rem;
+}
+
+.proof-track {
   position: relative;
   height: 24px;
 }
 
-.proof-track {
+.proof-ticks {
   position: absolute;
   inset: 11px 0 auto;
   height: 2px;
-  border-radius: 2px;
-  background: var(--vp-c-divider);
+  background: repeating-linear-gradient(
+    to right,
+    var(--vp-c-divider) 0 1px,
+    transparent 1px 32px
+  );
 }
 
 .proof-dot {
@@ -178,47 +215,53 @@
 }
 
 .proof-line {
-  margin: var(--eb-space-2) 0 var(--eb-space-6);
+  margin: var(--eb-space-4) 0 var(--eb-space-6);
   color: var(--vp-c-text-2);
-  font-size: 0.95rem;
-  letter-spacing: -0.01em;
+  font-size: 0.92rem;
 }
 
 .proof-facts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--eb-space-3);
+  gap: 0;
   margin: 0;
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: var(--eb-space-4);
 }
 
 .proof-fact {
-  padding: var(--eb-space-4);
-  border: 1px solid var(--vp-c-divider);
-  border-radius: var(--eb-radius);
-  background: var(--vp-c-bg-alt);
+  padding: 0 var(--eb-space-4);
   text-align: left;
+}
+
+.proof-fact:first-child {
+  padding-left: 0;
+}
+
+.proof-fact + .proof-fact {
+  border-left: 1px solid var(--vp-c-divider);
 }
 
 .proof-fact dt {
   margin-bottom: var(--eb-space-1);
   color: var(--vp-c-text-3);
   font-family: var(--vp-font-family-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .proof-fact dd {
   margin: 0;
   color: var(--vp-c-text-1);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.45;
 }
 
 /* ---------- preset comparison ---------- */
 
 .preset-tabs {
-  margin: var(--eb-space-6) 0;
+  max-width: 46rem;
+  margin: var(--eb-space-4) auto var(--eb-space-6);
   border: 1px solid var(--vp-c-divider);
   border-radius: var(--eb-radius);
   background: var(--vp-c-bg-alt);
@@ -347,6 +390,18 @@
 @media (max-width: 767px) {
   .proof-facts {
     grid-template-columns: 1fr;
+    row-gap: var(--eb-space-3);
+  }
+
+  .proof-fact,
+  .proof-fact:first-child {
+    padding: 0;
+  }
+
+  .proof-fact + .proof-fact {
+    border-left: 0;
+    border-top: 1px solid var(--vp-c-divider);
+    padding-top: var(--eb-space-3);
   }
 
   .preset-panel {
@@ -355,6 +410,7 @@
 
   .preset-tablist button {
     flex: 1;
+    min-height: 44px;
     padding-inline: var(--eb-space-2);
   }
 
@@ -370,4 +426,63 @@
     animation: none;
     transform: translateX(31px);
   }
+}
+
+/* ---------- feature band ---------- */
+
+/* One surface with dividers instead of four floating cards. A box should be
+   small relative to its container, and nested boxes make a page busy
+   (`boxes.md > Best practices`). */
+.VPFeatures .items {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: var(--eb-radius);
+  background: var(--vp-c-bg-alt);
+  overflow: hidden;
+}
+
+.VPFeatures .item {
+  margin: 0;
+}
+
+.VPFeatures .box {
+  border-radius: 0;
+  background: transparent;
+}
+
+@media (min-width: 768px) {
+  .VPFeatures .item:not(:last-child) .box {
+    border-right: 1px solid var(--vp-c-divider);
+  }
+}
+
+@media (max-width: 767px) {
+  .VPFeatures .item:not(:last-child) .box {
+    border-bottom: 1px solid var(--vp-c-divider);
+  }
+}
+
+/* ---------- how-to reading rhythm ---------- */
+
+/* Numbering belongs here because the steps really are a sequence. */
+.how-to .vp-doc ol {
+  padding-left: 1.5rem;
+}
+
+.how-to .vp-doc ol > li {
+  margin-bottom: var(--eb-space-6);
+  padding-left: var(--eb-space-2);
+}
+
+.how-to .vp-doc ol > li::marker {
+  color: var(--vp-c-brand-1);
+  font-family: var(--vp-font-family-mono);
+  font-weight: 600;
+}
+
+.how-to .vp-doc h2:is(#result, #caveat) + p {
+  margin-left: var(--eb-space-4);
+  padding: var(--eb-space-4);
+  border-left: 3px solid var(--vp-c-divider);
+  border-radius: 0 var(--eb-radius) var(--eb-radius) 0;
+  background: var(--vp-c-bg-alt);
 }

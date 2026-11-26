@@ -1,4 +1,5 @@
 ---
+pageClass: how-to
 description: Add a rubber-band pull at the top and bottom of a page without taking over scrolling.
 ---
 

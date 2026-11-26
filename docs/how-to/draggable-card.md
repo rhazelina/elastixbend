@@ -1,4 +1,5 @@
 ---
+pageClass: how-to
 description: Build a card that follows a pointer and springs back, while keeping the scroll contract intact.
 ---
 

@@ -1,4 +1,5 @@
 ---
+pageClass: how-to
 description: Read the live pull from React without re-rendering on every frame.
 ---
 

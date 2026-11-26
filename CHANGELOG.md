@@ -43,6 +43,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The docs theme extends VitePress with layout slots and three small Vue
   components: a proof strip, a preset comparison, and a contextual playground
   link. Navigation puts How-to first.
+- Redesigned the landing page around one signature element, a displacement
+  instrument with a tick rail and a settling readout, instead of a gradient hero
+  name and four floating cards. The feature list is now one surface with
+  dividers, and the preset comparison moved into the hero.
+- How-to pages use numbered steps, a callout for Result and Caveat, and a
+  contextual next step. Touch targets reach 44 px, and the one motion on the
+  page is disabled under reduced motion.
 - Fixed stale landing-page claims: core size is 4.02 kB brotli and there are
   three presets.
 - Internal Markdown links are checked in CI after the docs build. No runtime

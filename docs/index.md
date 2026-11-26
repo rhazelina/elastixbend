@@ -49,8 +49,6 @@ top or bottom of the page, and returns to rest when you stop.
 All three presets share the scheduler, spring integrator, clamp, and renderer.
 They differ only in what drives the target.
 
-<PresetTabs />
-
 Start with the [how-to guides](/how-to/rubber-band-at-the-edge) when you want one
 concrete result. Read [how it works](/guide/how-it-works) when you want the rule
 behind the result.

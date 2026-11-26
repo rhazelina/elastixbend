@@ -1,4 +1,5 @@
 ---
+pageClass: how-to
 description: Apply elastixbend to a horizontally scrolling document with axis x.
 ---
 

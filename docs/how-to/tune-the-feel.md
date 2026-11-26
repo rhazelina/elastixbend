@@ -1,4 +1,5 @@
 ---
+pageClass: how-to
 description: Tune resistance, curve, spring, and limits for wheel and touch separately.
 ---
 

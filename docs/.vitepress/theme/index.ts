@@ -21,7 +21,7 @@ export default {
   },
   Layout() {
     return h(DefaultTheme.Layout, null, {
-      "home-hero-after": () => h(HeroProof),
+      "home-hero-after": () => [h(HeroProof), h(PresetTabs)],
       "doc-after": () => h(PlaygroundLink),
     });
   },
