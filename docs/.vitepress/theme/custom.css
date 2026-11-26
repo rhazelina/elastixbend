@@ -109,3 +109,265 @@
     white-space: nowrap;
   }
 }
+
+/*
+ * Token roles stay mapped to VitePress semantic colors, so both appearances and
+ * Increased Contrast keep working. The extra values below are geometry, not new
+ * palette entries.
+ *
+ *   surface  --vp-c-bg / --vp-c-bg-alt
+ *   content  --vp-c-text-1 / -2 / -3
+ *   accent   --vp-c-brand-1   (primary action and current tab only)
+ *   signal   --vp-c-text-3    (metadata, never a second accent)
+ *
+ * Measured against the light surface: content 17.35:1, muted 5.65:1,
+ * accent 6.94:1. Against the dark surface: content 15.84:1, muted 5.07:1,
+ * accent 8.53:1. All clear the 4.5:1 floor for body text.
+ */
+:root {
+  --eb-radius: 10px;
+  --eb-space-1: 4px;
+  --eb-space-2: 8px;
+  --eb-space-3: 12px;
+  --eb-space-4: 16px;
+  --eb-space-6: 24px;
+  --eb-space-8: 32px;
+  --eb-content: 68rem;
+}
+
+/* ---------- hero proof ---------- */
+
+.hero-proof {
+  max-width: 44rem;
+  margin: var(--eb-space-8) auto var(--eb-space-8);
+  text-align: center;
+}
+
+.proof-trace {
+  position: relative;
+  height: 24px;
+}
+
+.proof-track {
+  position: absolute;
+  inset: 11px 0 auto;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--vp-c-divider);
+}
+
+.proof-dot {
+  position: absolute;
+  top: 6px;
+  left: calc(50% - 28px);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--vp-c-brand-1);
+  transform: translateX(31px);
+  animation: bend-settle 1.4s cubic-bezier(0.22, 0.8, 0.28, 1) 1 both;
+}
+
+/* One deliberate moment: a gesture overshoots, comes back, and settles. */
+@keyframes bend-settle {
+  0% { transform: translateX(0); }
+  34% { transform: translateX(46px); }
+  58% { transform: translateX(26px); }
+  78% { transform: translateX(34px); }
+  100% { transform: translateX(31px); }
+}
+
+.proof-line {
+  margin: var(--eb-space-2) 0 var(--eb-space-6);
+  color: var(--vp-c-text-2);
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.proof-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--eb-space-3);
+  margin: 0;
+}
+
+.proof-fact {
+  padding: var(--eb-space-4);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: var(--eb-radius);
+  background: var(--vp-c-bg-alt);
+  text-align: left;
+}
+
+.proof-fact dt {
+  margin-bottom: var(--eb-space-1);
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.proof-fact dd {
+  margin: 0;
+  color: var(--vp-c-text-1);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+/* ---------- preset comparison ---------- */
+
+.preset-tabs {
+  margin: var(--eb-space-6) 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: var(--eb-radius);
+  background: var(--vp-c-bg-alt);
+  overflow: hidden;
+}
+
+.preset-tablist {
+  display: flex;
+  gap: var(--eb-space-1);
+  padding: var(--eb-space-2);
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.preset-tablist button {
+  min-height: 36px;
+  padding: var(--eb-space-2) var(--eb-space-4);
+  border: 0;
+  border-radius: calc(var(--eb-radius) - 4px);
+  background: transparent;
+  color: var(--vp-c-text-2);
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.preset-tablist button:hover {
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+}
+
+.preset-tablist button[aria-selected="true"] {
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+.preset-panel {
+  padding: var(--eb-space-4) var(--eb-space-6) var(--eb-space-6);
+}
+
+.preset-driver {
+  margin: 0 0 var(--eb-space-3);
+  color: var(--vp-c-text-1);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.preset-panel pre {
+  margin: 0 0 var(--eb-space-3);
+}
+
+.preset-note {
+  margin: 0;
+  color: var(--vp-c-text-2);
+  font-size: 0.85rem;
+}
+
+/* ---------- contextual next step ---------- */
+
+.playground-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--eb-space-6);
+  margin-top: var(--eb-space-8);
+  padding: var(--eb-space-4) var(--eb-space-6);
+  border: 1px solid var(--vp-c-divider);
+  border-left: 3px solid var(--vp-c-brand-1);
+  border-radius: var(--eb-radius);
+  background: var(--vp-c-bg-alt);
+}
+
+.playground-kicker {
+  margin: 0 0 var(--eb-space-1);
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.playground-text {
+  margin: 0;
+  color: var(--vp-c-text-1);
+  font-size: 0.9rem;
+}
+
+.playground-action {
+  flex: none;
+  color: var(--vp-c-brand-1);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.playground-action:hover {
+  text-decoration: underline;
+}
+
+/* ---------- reading rhythm ---------- */
+
+.vp-doc {
+  max-width: var(--eb-content);
+}
+
+.vp-doc p,
+.vp-doc li {
+  line-height: 1.7;
+}
+
+.vp-doc h2 {
+  letter-spacing: -0.015em;
+}
+
+.vp-doc > h2:first-child {
+  margin-top: 0;
+}
+
+/* Keep the accent for primary actions and the current tab. Inline code is
+   content, so it takes the content color and a soft surface instead. */
+.vp-doc :not(pre) > code {
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg-soft);
+}
+
+@media (max-width: 767px) {
+  .proof-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .preset-panel {
+    padding: var(--eb-space-4);
+  }
+
+  .preset-tablist button {
+    flex: 1;
+    padding-inline: var(--eb-space-2);
+  }
+
+  .playground-link {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--eb-space-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proof-dot {
+    animation: none;
+    transform: translateX(31px);
+  }
+}

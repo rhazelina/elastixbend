@@ -4,11 +4,11 @@ layout: home
 hero:
   name: elastixbend
   text: Elastic scroll displacement
-  tagline: The page scrolls natively. A small spring-driven offset follows your gestures at the document edges, or trails behind scroll velocity, and springs back.
+  tagline: The page scrolls natively. A small spring-driven offset follows a gesture at an edge, trails behind scroll velocity, or tracks a pointer, then springs back.
   actions:
     - theme: brand
-      text: Get started
-      link: /guide/getting-started
+      text: Start with a how-to
+      link: /how-to/rubber-band-at-the-edge
     - theme: alt
       text: API reference
       link: /reference/options
@@ -19,7 +19,7 @@ features:
   - title: Same feel on every device
     details: Resistance applies to the cumulative gesture distance, and a fixed 1/240 s substep drives the spring. One coarse wheel tick and twenty fine touch moves settle in the same place.
   - title: Zero runtime dependencies
-    details: 3.4 kB brotli for the core. React is an optional peer, imported only through elastixbend/react.
+    details: 4.02 kB brotli for the core. React is an optional peer, imported only through elastixbend/react.
   - title: Stops when nothing moves
     details: The requestAnimationFrame loop is scheduled on demand and unscheduled the frame it goes idle. No idle ticker, no polling.
 ---
@@ -44,19 +44,16 @@ bend.destroy();
 That is the whole setup. `#stage` gets a `translate3d` while you pull past the
 top or bottom of the page, and returns to rest when you stop.
 
-## Two presets, one kernel
+## Three presets, one kernel
 
-Both presets share the scheduler, spring integrator, clamp, and renderer. They
-differ only in what drives the target.
+All three presets share the scheduler, spring integrator, clamp, and renderer.
+They differ only in what drives the target.
 
-| Preset | Driven by | Use it when |
-|---|---|---|
-| `edge` | Wheel and touch gestures past the document edge | You want a rubber band at the top and bottom of a page or panel |
-| `surface` | Scroll velocity, whatever produced it | Content should lean and catch up, including with keyboard, scrollbar, or programmatic scroll |
+<PresetTabs />
 
-```ts
-createBend(el, { preset: "surface", lagFactor: 0.04 });
-```
+Start with the [how-to guides](/how-to/rubber-band-at-the-edge) when you want one
+concrete result. Read [how it works](/guide/how-it-works) when you want the rule
+behind the result.
 
 ## Compose with your own transform
 

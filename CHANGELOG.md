@@ -36,6 +36,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `DEFAULT_RESISTANCE` is replaced by `DEFAULT_RESISTANCE_WHEEL` and
   `DEFAULT_RESISTANCE_TOUCH`.
 
+### Documentation
+
+- Six how-to guides lead the site: edge pull, scroll lean, draggable card,
+  horizontal axis, feel tuning, and React without per-frame renders.
+- The docs theme extends VitePress with layout slots and three small Vue
+  components: a proof strip, a preset comparison, and a contextual playground
+  link. Navigation puts How-to first.
+- Fixed stale landing-page claims: core size is 4.02 kB brotli and there are
+  three presets.
+- Internal Markdown links are checked in CI after the docs build. No runtime
+  code changed in this pass.
+
 ## [0.1.2] - 2026-11-20
 
 ### Changed

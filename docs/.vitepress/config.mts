@@ -20,7 +20,7 @@ export default defineConfig({
   title: "elastixbend",
   titleTemplate: ":title · elastixbend",
   description:
-    "Elastic scroll displacement that never touches scroll. A small spring-driven offset at the document edges or behind scroll velocity.",
+    "Elastic scroll displacement that never touches scroll. A small spring-driven offset at document edges, behind scroll velocity, or under a pointer.",
   lang: "en",
   cleanUrls: true,
   lastUpdated: true,
@@ -66,6 +66,7 @@ export default defineConfig({
     siteTitle: "elastixbend",
 
     nav: [
+      { text: "How-to", link: "/how-to/rubber-band-at-the-edge", activeMatch: "/how-to/" },
       { text: "Guide", link: "/guide/getting-started", activeMatch: "/guide/" },
       {
         text: "Reference",
@@ -76,6 +77,19 @@ export default defineConfig({
     ],
 
     sidebar: {
+      "/how-to/": [
+        {
+          text: "How-to",
+          items: [
+            { text: "Rubber band at the page edges", link: "/how-to/rubber-band-at-the-edge" },
+            { text: "Lean behind the scroll", link: "/how-to/lean-behind-scroll" },
+            { text: "Make a card follow a pointer", link: "/how-to/draggable-card" },
+            { text: "Use a horizontal axis", link: "/how-to/horizontal-scroll" },
+            { text: "Tune the weight and curve", link: "/how-to/tune-the-feel" },
+            { text: "Read the pull from React", link: "/how-to/react-without-re-renders" },
+          ],
+        },
+      ],
       "/guide/": [
         {
           text: "Guide",
