@@ -469,3 +469,71 @@
   border-radius: 0 var(--eb-radius) var(--eb-radius) 0;
   background: var(--vp-c-bg-alt);
 }
+
+/* ---------- live library demo ---------- */
+
+.bend-demo {
+  margin: var(--eb-space-6) 0;
+  padding: var(--eb-space-6);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: var(--eb-radius);
+  background: var(--vp-c-bg-alt);
+}
+
+.bend-demo-card {
+  margin-top: var(--eb-space-4);
+  /* The declaration the recipe asks the consumer to write. */
+  touch-action: none;
+  display: grid;
+  gap: var(--eb-space-1);
+  place-content: center;
+  height: 10rem;
+  border: 1px solid var(--vp-c-border);
+  border-radius: var(--eb-radius);
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  text-align: center;
+  cursor: grab;
+  user-select: none;
+}
+
+.bend-demo-card:active {
+  cursor: grabbing;
+}
+
+.bend-demo-card strong {
+  font-size: 1.05rem;
+}
+
+.bend-demo-card span {
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.76rem;
+}
+
+.bend-demo-readout {
+  display: flex;
+  gap: var(--eb-space-8);
+  margin: 0;
+}
+
+.bend-demo-readout dt {
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+
+.bend-demo-readout dd {
+  margin: 0;
+  color: var(--vp-c-text-1);
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.bend-demo-note {
+  margin: var(--eb-space-2) 0 0;
+  color: var(--vp-c-text-2);
+  font-size: 0.85rem;
+}

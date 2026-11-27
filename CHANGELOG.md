@@ -45,6 +45,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   page is disabled under reduced motion.
 - Fixed stale landing-page claims: core size is 4.02 kB brotli and there are
   three presets.
+- The draggable-card how-to has a live `BendDemo` component that imports the
+  public entry through a Vite alias to source. The docs build no longer needs a
+  prior library build, and the example cannot drift from the shipped API.
 - Internal Markdown links are checked in CI after the docs build. No runtime
   code changed in this pass.
 

@@ -1,6 +1,7 @@
 import DefaultTheme from "vitepress/theme";
 import type { Theme } from "vitepress";
 import { h } from "vue";
+import BendDemo from "./components/BendDemo.vue";
 import HeroInfo from "./components/HeroInfo.vue";
 import HeroProof from "./components/HeroProof.vue";
 import PlaygroundLink from "./components/PlaygroundLink.vue";
@@ -16,6 +17,7 @@ import "./custom.css";
 export default {
   extends: DefaultTheme,
   enhanceApp({ app }) {
+    app.component("BendDemo", BendDemo);
     app.component("HeroInfo", HeroInfo);
     app.component("HeroProof", HeroProof);
     app.component("PlaygroundLink", PlaygroundLink);

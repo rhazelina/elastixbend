@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig, type HeadConfig } from "vitepress";
 
 /**
@@ -17,6 +18,16 @@ function pageUrl(relativePath: string): string {
 }
 
 export default defineConfig({
+  // The docs demonstrate the package from this repo. Alias the public entry to
+  // source so a doc build never depends on a prior library build.
+  vite: {
+    resolve: {
+      alias: {
+        elastixbend: fileURLToPath(new URL("../../src/index.ts", import.meta.url)),
+      },
+    },
+    server: { fs: { allow: [".."] } },
+  },
   title: "elastixbend",
   titleTemplate: ":title · elastixbend",
   description:

@@ -47,6 +47,10 @@ A card that follows a mouse, finger, or pen 1:1 and springs back on release.
    createBend(card, { preset: "drag", dragMaxRatio: 0.3 });
    ```
 
+## Try it
+
+<BendDemo />
+
 ## Result
 
 The card follows the pointer 1:1, clamped to `dragMaxRatio × card size` and the
