@@ -33,10 +33,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The docs theme extends VitePress with layout slots and three small Vue
   components: a proof strip, a preset comparison, and a contextual playground
   link. Navigation puts How-to first.
-- Redesigned the landing page around one signature element, a displacement
-  instrument with a tick rail and a settling readout, instead of a gradient hero
-  name and four floating cards. The feature list is now one surface with
-  dividers, and the preset comparison moved into the hero.
+- Redesigned the landing page around one signature element: the `elastixbend`
+  wordmark. A pointer sets a target pressure per letter, and a spring with the
+  library's default kernel chases it, so the visible motion comes from the
+  integrator. `wght`, `wdth`, and `ital` stand for resistance, `edge`, and
+  `surface`. There is no idle animation, clicking sends a spring-chased ripple,
+  and reduced motion switches the whole effect off in place. The feature list is
+  one surface with dividers and the contract strip is static text.
 - How-to pages use numbered steps, a callout for Result and Caveat, and a
   contextual next step. Touch targets reach 44 px, and the one motion on the
   page is disabled under reduced motion.

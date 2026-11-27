@@ -134,115 +134,98 @@
   --eb-content: 68rem;
 }
 
-/* ---------- hero proof ---------- */
+/* ---------- wordmark ---------- */
 
-.hero-proof {
+/* Anybody Variable carries the three axes the wordmark animates: wght, wdth
+   and ital. It is self-hosted under docs/public/fonts with its OFL license. */
+@font-face {
+  font-family: "Anybody Variable";
+  font-style: italic;
+  font-weight: 100 900;
+  font-stretch: 50% 150%;
+  font-display: swap;
+  src: url("/fonts/anybody-latin-wdth-italic.woff2") format("woff2-variations");
+}
+
+.hero-info {
+  width: 100%;
+}
+
+.elastic-wordmark {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  font-family: "Anybody Variable", var(--vp-font-family-base);
+  font-style: italic;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  font-weight: 600;
+  font-variation-settings: "wght" 600, "wdth" 100, "ital" 0;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  user-select: none;
+  color: var(--vp-c-text-1);
+}
+
+.elastic-wordmark span {
+  display: inline-block;
+  will-change: font-variation-settings;
+}
+
+.hero-tagline {
+  max-width: 36rem;
+  margin: var(--eb-space-4) 0 0;
+  color: var(--vp-c-text-2);
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+@media (min-width: 60rem) {
+  .hero-tagline {
+    font-size: 1.5rem;
+    line-height: 1.5;
+  }
+}
+
+/* ---------- contract strip ---------- */
+
+.contract-strip {
+  width: calc(100% - 3rem);
   max-width: 46rem;
   margin: var(--eb-space-8) auto var(--eb-space-4);
 }
 
-.proof-instrument {
-  padding: var(--eb-space-5, 20px) var(--eb-space-6);
-  border: 1px solid var(--vp-c-divider);
-  border-radius: var(--eb-radius);
-  background: var(--vp-c-bg-alt);
-}
-
-.proof-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--eb-space-4);
-  margin-bottom: var(--eb-space-6);
-}
-
-.proof-name {
-  color: var(--vp-c-text-2);
-  font-family: var(--vp-font-family-mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.proof-readout {
-  color: var(--vp-c-text-1);
-  font-family: var(--vp-font-family-mono);
-  font-size: 1.05rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.proof-phase {
-  margin-left: var(--eb-space-2);
-  color: var(--vp-c-text-3);
-  font-size: 0.74rem;
-}
-
-.proof-track {
-  position: relative;
-  height: 24px;
-}
-
-.proof-ticks {
-  position: absolute;
-  inset: 11px 0 auto;
-  height: 2px;
-  background: repeating-linear-gradient(
-    to right,
-    var(--vp-c-divider) 0 1px,
-    transparent 1px 32px
-  );
-}
-
-.proof-dot {
-  position: absolute;
-  top: 6px;
-  left: calc(50% - 28px);
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--vp-c-brand-1);
-  transform: translateX(31px);
-  animation: bend-settle 1.4s cubic-bezier(0.22, 0.8, 0.28, 1) 1 both;
-}
-
-/* One deliberate moment: a gesture overshoots, comes back, and settles. */
-@keyframes bend-settle {
-  0% { transform: translateX(0); }
-  34% { transform: translateX(46px); }
-  58% { transform: translateX(26px); }
-  78% { transform: translateX(34px); }
-  100% { transform: translateX(31px); }
-}
-
-.proof-line {
-  margin: var(--eb-space-4) 0 var(--eb-space-6);
+.contract-line {
+  margin: 0 0 var(--eb-space-4);
   color: var(--vp-c-text-2);
   font-size: 0.92rem;
 }
 
-.proof-facts {
+.contract-facts {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0;
   margin: 0;
-  border-top: 1px solid var(--vp-c-divider);
   padding-top: var(--eb-space-4);
+  border-top: 1px solid var(--vp-c-divider);
 }
 
-.proof-fact {
+.contract-fact {
   padding: 0 var(--eb-space-4);
   text-align: left;
 }
 
-.proof-fact:first-child {
+.contract-fact:first-child {
   padding-left: 0;
 }
 
-.proof-fact + .proof-fact {
+.contract-fact + .contract-fact {
   border-left: 1px solid var(--vp-c-divider);
 }
 
-.proof-fact dt {
+.contract-fact dt {
   margin-bottom: var(--eb-space-1);
   color: var(--vp-c-text-3);
   font-family: var(--vp-font-family-mono);
@@ -250,7 +233,7 @@
   letter-spacing: 0.06em;
 }
 
-.proof-fact dd {
+.contract-fact dd {
   margin: 0;
   color: var(--vp-c-text-1);
   font-size: 0.88rem;
@@ -260,6 +243,7 @@
 /* ---------- preset comparison ---------- */
 
 .preset-tabs {
+  width: calc(100% - 3rem);
   max-width: 46rem;
   margin: var(--eb-space-4) auto var(--eb-space-6);
   border: 1px solid var(--vp-c-divider);
@@ -388,17 +372,17 @@
 }
 
 @media (max-width: 767px) {
-  .proof-facts {
+  .contract-facts {
     grid-template-columns: 1fr;
     row-gap: var(--eb-space-3);
   }
 
-  .proof-fact,
-  .proof-fact:first-child {
+  .contract-fact,
+  .contract-fact:first-child {
     padding: 0;
   }
 
-  .proof-fact + .proof-fact {
+  .contract-fact + .contract-fact {
     border-left: 0;
     border-top: 1px solid var(--vp-c-divider);
     padding-top: var(--eb-space-3);
@@ -422,9 +406,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .proof-dot {
-    animation: none;
-    transform: translateX(31px);
+  .elastic-wordmark span {
+    will-change: auto;
   }
 }
 
