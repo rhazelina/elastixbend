@@ -8,7 +8,7 @@
   "homepage": "https://github.com/rhazelina/elastixbend#readme",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/rhazelina/elastixbend.git"
+    "url": "git+https://github.com/rhazelina/elastixbend.git"
   },
   "bugs": {
     "url": "https://github.com/rhazelina/elastixbend/issues"
@@ -31,6 +31,7 @@
   "files": [
     "dist",
     "README.md",
+    "SECURITY.md",
     "SPEC.md",
     "DECISIONS.md",
     "CHANGELOG.md"
