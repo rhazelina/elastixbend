@@ -28,12 +28,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   The suite runs with one worker for the same reason. Two regression tests
   cover module load delay and a deliberately delayed first frame.
 
+### Security
+
+- Added `SECURITY.md` with supported versions and private vulnerability
+  reporting. The file ships in the published package.
+- Added Dependabot for root, docs, and GitHub Actions dependencies.
+- Added a release-triggered publish workflow with provenance, a pinned npm
+  version, a tag/version check, and no persisted checkout credentials.
+
 ### Documentation
 
 - Six how-to guides lead the site: edge pull, scroll lean, draggable card,
   horizontal axis, feel tuning, and React without per-frame renders.
-- The docs theme extends VitePress with layout slots and three small Vue
-  components: a proof strip, a preset comparison, and a contextual playground
+- The docs theme extends VitePress with layout slots and six small Vue
+  components: a live drag demo, the spring-driven wordmark, a hero info block,
+  a static contract strip, a preset comparison, and a contextual playground
   link. Navigation puts How-to first.
 - Redesigned the landing page around one signature element: the `elastixbend`
   wordmark. A pointer sets a target pressure per letter, and a spring with the
@@ -45,7 +54,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - How-to pages use numbered steps, a callout for Result and Caveat, and a
   contextual next step. Touch targets reach 44 px, and the one motion on the
   page is disabled under reduced motion.
-- Fixed stale landing-page claims: core size is 4.02 kB brotli and there are
+- Fixed stale landing-page claims: core size is 4.04 kB brotli and there are
   three presets.
 - The draggable-card how-to has a live `BendDemo` component that imports the
   public entry through a Vite alias to source. The docs build no longer needs a
