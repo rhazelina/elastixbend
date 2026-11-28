@@ -125,6 +125,44 @@ test.describe("drag preset", () => {
     await expect.poll(() => readPull(page)).toBe(0);
   });
 
+  test("accepts a pen pointer", async ({ page }) => {
+    const box = await page.locator("#stage").boundingBox();
+    if (!box) throw new Error("drag card has no box");
+
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+
+    await page.evaluate(
+      ({ x, y }) => {
+        const card = document.querySelector<HTMLElement>("#stage")!;
+        const fire = (type: string, clientY: number): void => {
+          card.dispatchEvent(
+            new PointerEvent(type, {
+              pointerId: 7,
+              pointerType: "pen",
+              clientX: x,
+              clientY,
+              button: 0,
+              bubbles: true,
+            }),
+          );
+        };
+        fire("pointerdown", y);
+        fire("pointermove", y + 60);
+      },
+      { x, y },
+    );
+
+    await expect.poll(() => readPull(page)).toBeGreaterThan(20);
+
+    await page.evaluate(() => {
+      document.querySelector<HTMLElement>("#stage")!.dispatchEvent(
+        new PointerEvent("pointerup", { pointerId: 7, pointerType: "pen", bubbles: true }),
+      );
+    });
+    await expect.poll(() => readPhase(page), { timeout: 3000 }).toBe("idle");
+  });
+
   test("does not scroll the page while dragging", async ({ page }) => {
     const card = page.locator("#stage");
     const box = await card.boundingBox();
@@ -137,6 +175,29 @@ test.describe("drag preset", () => {
     await page.waitForTimeout(120);
 
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+});
+
+test.describe("drag preset on the x axis", () => {
+  test.beforeEach(async ({ page }) => {
+    await open(page, "/drag.html?axis=x");
+  });
+
+  test("follows a horizontal pointer", async ({ page }) => {
+    const box = await page.locator("#stage").boundingBox();
+    if (!box) throw new Error("drag card has no box");
+
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 70, y, { steps: 6 });
+
+    await expect.poll(() => readPull(page)).toBeGreaterThan(20);
+
+    await page.mouse.up();
+    await expect.poll(() => readPhase(page), { timeout: 3000 }).toBe("idle");
   });
 });
 
@@ -202,6 +263,31 @@ test.describe("surface preset", () => {
 
 test.describe("touch drag", () => {
   test.use({ hasTouch: true, viewport: { width: 390, height: 780 } });
+
+  test("edge pulls with a synthetic finger drag", async ({ page }) => {
+    await open(page, "/edge.html");
+
+    await page.evaluate(() => {
+      const fire = (type: string, clientY: number): void => {
+        const event = new Event(type, { bubbles: true });
+        Object.defineProperty(event, "touches", {
+          value: type === "touchend" ? [] : [{ clientY }],
+        });
+        window.dispatchEvent(event);
+      };
+      fire("touchstart", 600);
+      fire("touchmove", 700);
+    });
+
+    await expect.poll(() => readPull(page)).toBeGreaterThan(2);
+
+    await page.evaluate(() => {
+      const event = new Event("touchend", { bubbles: true });
+      Object.defineProperty(event, "touches", { value: [] });
+      window.dispatchEvent(event);
+    });
+    await expect.poll(() => readPhase(page), { timeout: 3000 }).toBe("idle");
+  });
 
   test("edge pulls with a finger drag", async ({ page, context, browserName }) => {
     test.skip(browserName !== "chromium", "uses CDP to dispatch touch points");

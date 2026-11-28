@@ -42,9 +42,6 @@ export function createDragPreset(host: PresetHost, element: HTMLElement): Preset
     return Math.max(-ceiling, Math.min(ceiling, value));
   }
 
-  const origin = (event: PointerEvent): number =>
-    host.axis === "y" ? event.clientY : event.clientX;
-
   function onPointerDown(event: PointerEvent): void {
     if (pointerId !== null) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -61,7 +58,11 @@ export function createDragPreset(host: PresetHost, element: HTMLElement): Preset
 
     // Capture keeps the gesture alive when the pointer leaves the element. It
     // does not cancel anything, so the scroll contract is untouched.
-    element.setPointerCapture?.(event.pointerId);
+    try {
+      element.setPointerCapture?.(event.pointerId);
+    } catch {
+      // Synthetic pointers have no capture target. The gesture still works.
+    }
     host.requestFrame();
   }
 
@@ -78,7 +79,11 @@ export function createDragPreset(host: PresetHost, element: HTMLElement): Preset
     active = false;
 
     if (pointerId !== null) {
-      element.releasePointerCapture?.(pointerId);
+      try {
+        element.releasePointerCapture?.(pointerId);
+      } catch {
+        // Capture may already be gone after a cancel or a synthetic pointer.
+      }
       pointerId = null;
     }
 
@@ -116,7 +121,11 @@ export function createDragPreset(host: PresetHost, element: HTMLElement): Preset
       element.removeEventListener("pointerup", endDrag);
       element.removeEventListener("pointercancel", endDrag);
       if (pointerId !== null) {
-        element.releasePointerCapture?.(pointerId);
+        try {
+          element.releasePointerCapture?.(pointerId);
+        } catch {
+          // Same as above: losing capture must not block cleanup.
+        }
         pointerId = null;
       }
     },

@@ -6,6 +6,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Lint now runs as part of `npm run verify`, so it also gates `prepublishOnly`.
+- Updated size figures to 4.06 kB brotli for the core and 4.52 kB for the React
+  binding plus core.
+
+### Fixed
+
+- Pointer capture failures no longer abort a drag. This showed up with
+  synthetic pen pointers, where there is no capture target.
+
+### Tests
+
+- Added e2e coverage for a horizontal drag, a pen pointer, and a synthetic
+  finger drag that runs on every browser instead of only Chromium.
+
 ## [0.4.0] - 2026-11-28
 
 ### Added

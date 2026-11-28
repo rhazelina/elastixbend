@@ -195,13 +195,13 @@ Reproduce with `npm run size` and `npm run measure`.
 
 | Entry | Brotli + deps (size-limit) | Minified + gzip | Budget |
 |---|---|---|---|
-| `elastixbend` (core) | **4.04 kB** | 4.73 kB | 5 kB |
+| `elastixbend` (core) | **4.06 kB** | 4.77 kB | 5 kB |
 | `elastixbend/react` (binding only) | not applicable | **0.54 kB** | 1.5 kB |
-| `elastixbend/react` (binding + core) | **4.47 kB** | 4.91 kB | 5 kB |
+| `elastixbend/react` (binding + core) | **4.52 kB** | 4.95 kB | 5 kB |
 
 The React binding is reported two ways on purpose: on its own (0.54 kB, what it
 adds to a page that already imported the core) and bundled with the core
-(4.47 kB, what a React-only consumer actually ships). `size-limit` cannot express
+(4.52 kB, what a React-only consumer actually ships). `size-limit` cannot express
 the first case because the built entry shares a chunk with the core, so it is
 measured by `npm run size:react` with the chunk marked external. `size-limit`'s
 figure is brotli; the gzip column is `esbuild --bundle --minify` plus `gzip -9`.

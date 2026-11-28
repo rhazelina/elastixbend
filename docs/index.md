@@ -19,7 +19,7 @@ features:
   - title: Same feel on every device
     details: Resistance applies to the cumulative gesture distance, and a fixed 1/240 s substep drives the spring. One coarse wheel tick and twenty fine touch moves settle in the same place.
   - title: Zero runtime dependencies
-    details: 4.04 kB brotli for the core. React is an optional peer, imported only through elastixbend/react.
+    details: 4.06 kB brotli for the core. React is an optional peer, imported only through elastixbend/react.
   - title: Stops when nothing moves
     details: The requestAnimationFrame loop is scheduled on demand and unscheduled the frame it goes idle. No idle ticker, no polling.
 ---

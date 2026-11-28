@@ -5,6 +5,7 @@ import { bare, markReady } from "./harness";
 
 const params = new URLSearchParams(location.search);
 const off = params.has("off");
+const axis = params.get("axis") === "x" ? "x" : "y";
 
 const stage = document.querySelector<HTMLElement>("#stage");
 const panel = document.querySelector<HTMLElement>("#controls");
@@ -32,6 +33,7 @@ function watch(instance: BendInstance): () => void {
 function optionsFrom(raw: Record<string, number> = {}): Parameters<typeof createBend>[1] {
   return {
     preset: "drag",
+    axis,
     debug: true,
     dragMaxRatio: raw.dragMaxRatio ?? 0.22,
     max: { px: raw.maxPx ?? 160, ratio: raw.maxRatio ?? 0.3 },

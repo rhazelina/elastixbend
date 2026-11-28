@@ -31,14 +31,21 @@ export function Bend({ children, className, style, onStateChange, ...options }: 
   const [instance, setInstance] = useState<BendInstance | null>(null);
 
   const optionsRef = useRef(options);
-  optionsRef.current = options;
   const onStateChangeRef = useRef(onStateChange);
-  onStateChangeRef.current = onStateChange;
+
+  // Keep the latest values available to the mount effect without writing refs
+  // during render. Declarations above the mount effect run first.
+  useEffect(() => {
+    optionsRef.current = options;
+    onStateChangeRef.current = onStateChange;
+  });
 
   useEffect(() => {
     const target = hostRef.current;
     if (!target) return;
 
+    // Options and the callback are read once, on mount. Changing them later is
+    // a remount, which is the documented behaviour of `<Bend>`.
     const bend = createBend(target, optionsRef.current);
     setInstance(bend);
 
